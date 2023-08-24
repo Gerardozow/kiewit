@@ -1,5 +1,5 @@
 <?php
-$title_page = 'Panel de Usuarios | Kiewit';
+$title_page = 'Evaluaciones | Kiewit';
 //Menus Sidebar
 $separador = 'evaluciones';
 $page = 'evaluaciones';
@@ -8,7 +8,7 @@ require_once('includes/load.php');
 if (!$session->isUserLoggedIn(true)) {
     redirect('index.php', false);
 }
-page_require_level(1);
+page_require_level(2);
 
 //Obtener todos los departamentos
 $departamento = find_all_az('departamentos', 'departamento');
@@ -20,21 +20,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $limit = 10;
     $offset = ($pagina - 1) * $limit;
 
-    $totalUsers = count_by_id('departamentos');
+    $totalUsers = count_by_id('evaluaciones');
     $totalPages = ceil($totalUsers['total'] / $limit);
 
-    $users = find_departaments_with_pagination($limit, $offset); // Agrega una función para obtener usuarios paginados
+    $users = find_evaluaciones_with_pagination($limit, $offset); // Agrega una función para obtener usuarios paginados
 
 
 
-    if (isset($_GET['delete_departameto'])) {
-        $delete_id = delete_by_id('departamentos', (int)$_GET['delete_departameto']);
+    if (isset($_GET['delete_evaluacion'])) {
+        $delete_id = delete_by_id('evaluaciones', (int)$_GET['delete_evaluacion']);
         if ($delete_id) {
-            $session->msg("s", "Departamento Eliminado.");
-            redirect('departamentos.php');
+            $session->msg("s", "Evaluacion Eliminada.");
+            redirect('evaluaciones.php');
         } else {
             $session->msg("d", "Algo fallo.");
-            redirect('departamentos.php');
+            redirect('evaluaciones.php');
         }
     }
 }
@@ -42,41 +42,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['add_departamento'])) {
-        $req_fields = array('departamento');
+    if (isset($_POST['add_evaluacion'])) {
+        $req_fields = array('evaluacion', 'departamento', 'descripcion', 'fecha', 'tiempo');
         validate_fields($req_fields);
-        $depa = remove_junk($db->escape($_POST['departamento']));
+        $evaluacion = remove_junk($db->escape($_POST['evaluacion']));
 
-        $results = find_by_sql("SELECT * FROM departamentos WHERE departamento='{$depa}'");
+        $results = find_by_sql("SELECT * FROM evaluaciones WHERE titulo='{$evaluacion}'");
 
         if (empty($results)) {
+            $departamento = remove_junk($db->escape($_POST['departamento']));
+            $descripcion = $_POST['descripcion'];
+            $fecha = remove_junk($db->escape($_POST['fecha']));
+            $fechaend = remove_junk($db->escape($_POST['fechaend']));
+            $tiempo = remove_junk($db->escape($_POST['tiempo']));
+
             if (empty($errors)) {
                 echo 'Sin errores';
-                $query = "INSERT INTO departamentos (departamento) VALUES ('{$depa}')";
+                $query = "INSERT INTO evaluaciones (titulo,id_departamento,descripcion,fecha_inicio,fecha_final,tiempo,estatus) VALUES ('{$evaluacion}','{$departamento}','{$descripcion}','{$fecha}','{$fechaend}','{$tiempo}','0')";
                 if ($db->query($query)) {
                     //sucess
-                    $session->msg('s', "¡Departamento creado correctamente!");
-                    redirect('departamentos.php', false);
+                    $session->msg('s', "Evaluacion creada correctamente!");
+                    redirect('evaluaciones.php', false);
                 } else {
                     //failed
-                    $session->msg('d', 'Lo sentimos, ¡no se ha podido crear el departamento!');
-                    redirect('departamentos.php', false);
+                    $session->msg('d', 'Lo sentimos, ¡no se ha podido crear la evaluacion!');
+                    redirect('evaluaciones.php', false);
                 }
             } else {
                 $session->msg("d", $errors);
-                redirect('departamentos.php', false);
+                redirect('evaluaciones.php', false);
             }
         } else {
             $session->msg('d', "Departamento ya registrado.");
-            redirect('departamentos.php', false);
+            redirect('evaluaciones.php', false);
+        }
+    }
+
+
+
+    if (isset($_POST['query'])) {
+        $query = $_POST['query'];
+
+        $sql = "SELECT e.*, d.departamento AS descripcion_departamento FROM evaluaciones e JOIN departamentos d ON e.id_departamento = d.id ORDER BY id_departamento ASC LIMIT $limit OFFSET $offset LIKE '%$query%'";
+        $result = $conn->query($sql);
+
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr><td>" . $row['id'] . "</td><td>" . $row['nombre'] . "</td><td>" . $row['precio'] . "</td></tr>";
+            }
+        } else {
+            echo "<tr><td colspan='3'>No se encontraron resultados</td></tr>";
         }
     }
 }
-
-
-
-
-
 
 
 include_once('layouts/head.php');
@@ -103,7 +121,7 @@ include_once('layouts/head.php');
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-end">
-                                <li class="breadcrumb-item"><a href="#">Evaluaciones</a></li>
+                                <li class="breadcrumb-item"><a href="evaluacion_resumen.php">Resumen</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">
                                     Evaluaciones
                                 </li>
@@ -115,16 +133,16 @@ include_once('layouts/head.php');
                 <!--end::Container-->
             </div>
             <!--end::App Content Header-->
-            <?php echo display_msg($msg); ?>
             <!--begin::App Content-->
             <div class="app-content">
                 <!--begin::Container-->
                 <div class="container-fluid">
+                    <?php echo display_msg($msg); ?>
                     <div class="row mb-2">
                         <!-- Empieza el /.col del formulario -->
                         <div class="col-md-12">
                             <!--begin::Form Validation-->
-                            <div class="card card-info card-outline">
+                            <div class="card card-info card-outline collapsed-card">
                                 <!--begin::Header-->
                                 <div class="card-header">
                                     <div class="card-title">Crear Nueva Evaluacion</div>
@@ -141,9 +159,9 @@ include_once('layouts/head.php');
                                 </div>
                                 <!--end::Header-->
                                 <!--begin::Form-->
-                                <form class="needs-validation" action="./evaluaciones.php" method="POST" novalidate>
-                                    <!--begin::Body-->
-                                    <div class="card-body">
+                                <!--begin::Body-->
+                                <div class="card-body">
+                                    <form class="needs-validation" action="./evaluaciones.php" method="POST" novalidate>
                                         <!--begin::Row-->
                                         <div class="row g-3">
                                             <!--begin::Col-->
@@ -183,7 +201,7 @@ include_once('layouts/head.php');
                                             <!--begin::Col-->
                                             <div class="col-md-4">
                                                 <label for="fechaend" class="form-label">Fecha de cierre</label>
-                                                <input type="date" class="form-control" id="fechaend" name="fechaend" required>
+                                                <input type="date" class="form-control" id="fechaend" name="fechaend">
                                                 <span class="fw-bold" style="font-size: .7rem;">*Dejar vacio si no tiene vigencia</span>
                                                 <div class="valid-feedback">¡Se ve bien!.</div>
                                                 <div class="invalid-feedback">
@@ -199,27 +217,23 @@ include_once('layouts/head.php');
                                                 <div class="valid-feedback">¡Se ve bien!.</div>
                                             </div>
                                             <!--end::Col-->
-                                            <!--begin::Col-->
-                                            <div class="col-md-6">
-                                                <div class="form-check form-switch">
-                                                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" />
-                                                    <label class="form-check-label" for="flexSwitchCheckDefault">Default switch checkbox input</label>
+                                            <div class="col-md-12">
+                                                <div class="float-end">
+                                                    <button class="btn btn-success" type="submit" name="add_evaluacion">Registrar</button>
                                                 </div>
                                             </div>
-                                            <!--end::Col-->
                                         </div>
                                         <!--end::Row-->
+                                    </form>
+                                    <!--end::Form-->
+                                </div>
+                                <!--end::Body-->
+                                <!--begin::Footer-->
+                                <div class="card-footer">
+                                    <div class="float-end">
                                     </div>
-                                    <!--end::Body-->
-                                    <!--begin::Footer-->
-                                    <div class="card-footer">
-                                        <div class="float-end">
-                                            <button class="btn btn-success" type="submit" name="add_test">Registrar</button>
-                                        </div>
-                                    </div>
-                                    <!--end::Footer-->
-                                </form>
-                                <!--end::Form-->
+                                </div>
+                                <!--end::Footer-->
                                 <!--begin::JavaScript-->
                                 <script>
                                     (() => {
@@ -245,11 +259,11 @@ include_once('layouts/head.php');
                     <!-- Termina el /.row del formulario -->
                     <!--begin::Row-->
                     <div class="row mb-2">
-                        <div class="col-md-4">
+                        <div class="col-md-12">
                             <div class="card card-warning card-outline">
                                 <div class="card-header">
-                                    <h3 class="card-title">evaluciones</h3>
-                                    <div class="card-tools">
+                                    <h3 class="card-title">Evaluaciones</h3>
+                                    <div class="card-tools d-flex">
                                         <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
                                             <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
                                             <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
@@ -258,29 +272,57 @@ include_once('layouts/head.php');
                                             <i data-lte-icon="maximize" class="bi bi-fullscreen"></i>
                                             <i data-lte-icon="minimize" class="bi bi-fullscreen-exit"></i>
                                         </button>
+                                        <form action="" method="get">
+                                            <div class="input-group input-group-sm" style="width: 200px;">
+                                                <input type="text" name="table_search" class="input-group-text form-control float-right" id="search_evaluaciones" placeholder="Buscar">
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="bi bi-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                                 <!-- /.card-header -->
                                 <div class="card-body table-responsive p-0">
-                                    <table class="table table-hover text-nowrap">
+                                    <table class="table table-hover text-nowrap" id="table_evaluaciones">
                                         <thead>
                                             <tr>
                                                 <th style="width: 20px;">#</th>
-                                                <th>Departamento</th>
-                                                <th style="width: 40px;">Opciones</th>
+                                                <th>Titulo</th>
+                                                <th class="text-center text-wrap">Departamento</th>
+                                                <th class="text-center text-wrap" style="max-width: 60px;">Fecha de Inicio</th>
+                                                <th class="text-center text-wrap" style="max-width: 60px;">Fecha de Cierre</th>
+                                                <th class="text-center" style="max-width: 40px;">Tiempo</th>
+                                                <th class="text-center text-wrap" style="max-width: 60px;">Estatus</th>
+                                                <th class="text-center text-wrap" style="max-width: 40px;">Opciones</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody class="search_evaluaciones" id=="search_evaluaciones_table">
                                             <?php $i = $offset + 1;
                                             foreach ($users as $user) : ?>
-                                                <tr>
+                                                <tr class="clickable-row" data-href="./evaluacion_detalle.php?id=<?= $user['id'] ?>">
                                                     <td><?php echo $i;
                                                         $i++; ?></td>
-                                                    <td><?php echo $user['departamento']; ?></td>
+                                                    <td class="text-wrap"><?php echo $user['titulo']; ?></td>
+                                                    <td class="text-center text-wrap"><?php echo $user['descripcion_departamento']; ?></td>
+                                                    <td class="text-center "><?php echo $user['fecha_inicio']; ?></td>
+                                                    <td class="text-center "><?php echo $user['fecha_final']; ?></td>
+                                                    <td class="text-center text-wrap"><?php echo $user['tiempo']; ?></td>
+                                                    <td class="text-center text-wrap"><?php
+                                                                                        if ($user['estatus'] == 0) {
+                                                                                            echo '<span class="badge fs-6 text-bg-secondary">Pendiente</span>';
+                                                                                        } elseif ($user['estatus'] == 1) {
+                                                                                            echo '<span class="badge fs-6 text-bg-success">Activa</span>';
+                                                                                        } elseif ($user['estatus'] == 2) {
+                                                                                            echo '<span class="badge fs-6 text-bg-danger">Desactivada</span>';
+                                                                                        }
+                                                                                        ?></td>
                                                     <td>
-                                                        <ul class="list-group list-group-horizontal justify-content-center">
-                                                            <!-- <a href="./departamentos.php?edit_departameto=<?php echo $user['id'] ?>" class="badge bg-secondary px-2"><i class="bi bi-pencil"></i></a> -->
-                                                            <a href="./departamentos.php?delete_departameto=<?php echo $user['id'] ?>" class="badge bg-danger px-2"><i class="bi bi-trash"></i></a>
+                                                        <ul class="list-group list-group-horizontal justify-content-center gap-2 ">
+                                                            <a href="./evaluacion_detalle.php?id=<?= $user['id'] ?>" class="fs-6 badge bg-secondary px-2"><i class="bi bi-pencil"></i></a>
+                                                            <a href="./evaluaciones.php?delete_evaluacion=<?php echo $user['id'] ?>" class="fs-6 badge bg-danger px-2 delete-link" data-user-id="<?php echo $user['id'] ?>"><i class="bi bi-trash"></i></a>
                                                         </ul>
                                                     </td>
                                                 </tr>
@@ -292,7 +334,7 @@ include_once('layouts/head.php');
                                 <div class="card-footer clearfix">
                                     <div class="row">
                                         <div class="col-6">
-                                            <p class="m-0">Total de Departamentos <?= $totalUsers['total'] ?></p>
+                                            <p class="m-0">Total de evaluaciones <?= $totalUsers['total'] ?></p>
                                         </div>
                                         <div class="col-6">
                                             <ul class="pagination pagination-sm m-0 float-end">
@@ -330,12 +372,35 @@ include_once('layouts/head.php');
         <?php include_once('layouts/footer.php'); //footer 
         ?>
     </div>
+
+
+
+    <!-- Modal -->
+    <div class="modal" id="deleteConfirmationModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar esta evaluacion?
+                </div>
+                <div class="modal-footer">
+                    <a id="confirmDeleteButton" href="#" class="btn btn-danger">Eliminar</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!--end::App Wrapper-->
     <?php include_once('layouts/scripts.php'); //scripts 
     ?>
+
+
+    <!-- OPTIONAL SCRIPTS -->
     <!-- jquey -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-
     <!-- include summernote css/js-->
     <link href="./includes/libs/summernote/summernote-lite.css" rel="stylesheet">
     <script src="./includes/libs/summernote/summernote-lite.js"></script>
@@ -355,13 +420,18 @@ include_once('layouts/head.php');
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['table', ['table']],
                 ['insert', ['link', 'picture']],
-                ['view', ['fullscreen','codeview']]
+                ['view', ['fullscreen', 'codeview']]
             ]
 
         });
         $('.note-editing-area').css('background-color', '#fff');
 
+
+
         function uploadImage(image) {
+            var currentURL = window.location.href; // Obtiene la URL completa
+            var baseURL = currentURL.substring(0, currentURL.lastIndexOf('/') + 1); // Obtiene la parte de la URL hasta la última barra
+            console.log(baseURL); // Muestra la URL base en la consola para verificar
             var data = new FormData();
             data.append("image", image);
             $.ajax({
@@ -372,7 +442,7 @@ include_once('layouts/head.php');
                 data: data,
                 type: "post",
                 success: function(url) {
-                    var image = $('<img>').attr('src', 'http://localhost/kiewit' + url);
+                    var image = $('<img>').attr('src', baseURL + url);
                     $('#descripcion').summernote("insertNode", image[0]);
                 },
                 error: function(data) {
@@ -380,10 +450,6 @@ include_once('layouts/head.php');
                 }
             });
         }
-    </script>
-
-    <!-- OPTIONAL SCRIPTS -->
-    <script>
         document.addEventListener("DOMContentLoaded", function() {
             const fechaInicioInput = document.getElementById("fecha");
             const fechaCierreInput = document.getElementById("fechaend");
@@ -413,6 +479,51 @@ include_once('layouts/head.php');
                     fechaCierreInput.classList.remove("is-invalid");
                 }
             }
+        });
+
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Obtén todos los enlaces con la clase 'delete-link'
+            const deleteLinks = document.querySelectorAll(".delete-link");
+
+            // Itera sobre los enlaces y agrega un listener de clic a cada uno
+            deleteLinks.forEach(function(link) {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault(); // Evita que el enlace se abra
+
+                    const userId = link.getAttribute("data-user-id"); // Obtiene el ID del usuario
+                    const modal = new bootstrap.Modal(document.getElementById("deleteConfirmationModal")); // Crea una instancia del modal
+
+                    // Actualiza el enlace del botón de confirmación del modal con el ID del usuario
+                    const confirmButton = document.getElementById("confirmDeleteButton");
+                    confirmButton.setAttribute("href", `./evaluaciones.php?delete_evaluacion=${userId}`);
+
+                    // Muestra el modal
+                    modal.show();
+                });
+            });
+        });
+
+        //////////Busqueda de la tabla.
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var searchInput = document.getElementById("search_evaluaciones");
+            var tableRows = document.querySelectorAll("#table_evaluaciones tbody tr");
+
+            searchInput.addEventListener("keyup", function() {
+                var query = searchInput.value.toLowerCase().trim();
+
+                tableRows.forEach(function(row) {
+                    var title = row.querySelector(".text-wrap").textContent.toLowerCase();
+
+                    if (title.indexOf(query) !== -1) {
+                        row.style.display = "table-row";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            });
         });
     </script>
 </body><!--end::Body-->

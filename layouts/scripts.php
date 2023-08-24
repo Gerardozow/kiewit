@@ -1,3 +1,4 @@
+<script src="./dist/js/main.js"></script>
 <!--begin::Script-->
 <!--begin::Third Party Plugin(OverlayScrollbars)-->
 <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.1.0/browser/overlayscrollbars.browser.es6.min.js" integrity="sha256-NRZchBuHZWSXldqrtAOeCZpucH/1n1ToJ3C8mSK95NU=" crossorigin="anonymous"></script>
@@ -9,7 +10,7 @@
 <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
 <script src="./dist/js/adminlte.js"></script>
 <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
-<script src="./dist/js/main.js"></script>
+
 <script>
     const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
     const Default = {

@@ -360,6 +360,39 @@ function find_departaments_with_pagination($limit, $offset)
   return $result;
 }
 
+/*--------------------------------------------------------------*/
+/* Function para determianr las evaluaciones
+/*--------------------------------------------------------------*/
+
+function find_evaluaciones_with_pagination($limit, $offset)
+{
+  global $db;
+  $sql = $db->query("SELECT e.*, d.departamento AS descripcion_departamento FROM evaluaciones e JOIN departamentos d ON e.id_departamento = d.id ORDER BY id_departamento ASC LIMIT $limit OFFSET $offset");
+  // Cambia fetch_assoc a fetch_all para obtener todos los resultados
+  $result = $sql->fetch_all(MYSQLI_ASSOC);
+
+  return $result;
+}
+
+/*--------------------------------------------------------------*/
+/* Function para determianr las evaluaciones
+/*--------------------------------------------------------------*/
+
+function find_evaluacion($id)
+{
+  global $db;
+  $sql = $db->query("SELECT e.*, d.departamento AS descripcion_departamento FROM evaluaciones e JOIN departamentos d ON e.id_departamento = d.id WHERE e.id = $id");
+  // Cambia fetch_assoc a fetch_all para obtener todos los resultados
+  $result = $sql->fetch_assoc();
+
+  return $result;
+}
+
+
+
+/*--------------------------------------------------------------*/
+/* Function ordenar de ASC
+/*--------------------------------------------------------------*/
 function find_all_az($table, $order)
 {
   global $db;
@@ -367,14 +400,31 @@ function find_all_az($table, $order)
     return find_by_sql("SELECT * FROM " . $db->escape($table) . " ORDER BY ".  $db->escape($order). " ASC");
   }
 }
+
+/*--------------------------------------------------------------*/
+/* Function ordenar de DEC
+/*--------------------------------------------------------------*/
 function find_all_za($table, $order)
 {
   global $db;
   if (tableExists($table)) {
-    return find_by_sql("SELECT * FROM " . $db->escape($table));
+    return find_by_sql("SELECT * FROM " . $db->escape($table) . " ORDER BY ".  $db->escape($order). " ASC");
   }
 }
 
-
+/*--------------------------------------------------------------*/
+/* Actualiar la funcioon
+/*--------------------------------------------------------------*/
+function update_evaluacion($id,$password)
+{
+  global $db;
+  $id = (int)$id;
+  $pass = sha1($password);
+  // Insertar un nuevo registro en la tabla reset_pass
+  $query1 = "UPDATE users SET password = '{$pass}' WHERE id = '{$id}'";
+  $db->query($query1);
+  $query2 = "DELETE FROM reset_pass WHERE user_id = '{$id}'";
+  $db->query($query2);
+}
 
 ?>

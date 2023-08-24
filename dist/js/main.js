@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
     // Obtener todas las pestañas
     const tabs = document.querySelectorAll('.tabu');
@@ -26,4 +27,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+
+});
+
+/*--------------------------------------------------------------*/
+/* Funcion para abrir link dando doble clik a las tablas
+/*--------------------------------------------------------------*/
+document.addEventListener("DOMContentLoaded", function () {
+    const rows = document.querySelectorAll(".clickable-row");
+    let lastClickTime = 0;
+
+    rows.forEach(row => {
+        row.addEventListener("click", function () {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastClickTime < 300) {
+                const link = row.getAttribute("data-href");
+                if (link) {
+                    window.location.href = link;
+                }
+            }
+            lastClickTime = currentTime;
+        });
+    });
 });

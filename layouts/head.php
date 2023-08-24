@@ -20,4 +20,7 @@
     <!--begin::Required Plugin(AdminLTE)-->
     <link rel="stylesheet" href="./dist/css/adminlte.css">
     <!--end::Required Plugin(AdminLTE)-->
+    <!--begin::Required style.css-->
+    <link rel="stylesheet" href="./dist/css/style.css">
+    <!--end::Required style.css-->
 </head>

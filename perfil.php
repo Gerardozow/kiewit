@@ -117,9 +117,9 @@ include_once('layouts/head.php');
                                                     </div>
                                                 </div>
                                                 <div class="form-group row mb-2">
-                                                    <label for="inputName2" class="col-sm-2 col-form-label">Apellidos</label>
+                                                    <label for="inputName3" class="col-sm-2 col-form-label">Apellidos</label>
                                                     <div class="col-sm-10">
-                                                        <input type="text" class="form-control" id="inputName2" value="<?= $user['last_name'] ?>" placeholder="Name" disabled>
+                                                        <input type="text" class="form-control" id="inputName3" value="<?= $user['last_name'] ?>" placeholder="Name" disabled>
                                                     </div>
                                                 </div>
                                             </form>
