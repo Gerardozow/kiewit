@@ -71,14 +71,13 @@ if (isset($_POST["estado"])) {
     } else {
         echo "Error al actualizar el estado: " . $db->error;
     }
-
 }
 
 
 $title_page = 'Evaluacuion | ' . $evaluacion;
 //Menus Sidebar
-$separador = '';
-$page = '';
+$separador = 'evaluciones';
+$page = 'evaluaciones';
 
 //Obtener todos los departamentos
 $departamento = find_all_az('departamentos', 'departamento');
@@ -208,7 +207,7 @@ include_once('layouts/head.php');
                         <!-- Empieza el /.col del formulario -->
                         <div class="col-12">
                             <!--begin::Form Validation-->
-                            <div class="card card-primary card-outline collapsed-card">
+                            <div class="card card-warning card">
                                 <!--begin::Header-->
                                 <div class="card-header">
                                     <div class="card-title">Datos Generales</div>
@@ -221,82 +220,76 @@ include_once('layouts/head.php');
                                             <i data-lte-icon="maximize" class="bi bi-fullscreen"></i>
                                             <i data-lte-icon="minimize" class="bi bi-fullscreen-exit"></i>
                                         </button>
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                                            <label class="form-check-label" for="flexSwitchCheckDefault">Desactivada</label>
-                                        </div>
                                     </div>
                                 </div>
                                 <!--end::Header-->
                                 <!--begin::Form-->
                                 <!--begin::Body-->
                                 <div class="card-body">
-                                    <form class="needs-validation" action="./evaluacion_detalle.php?id=<?= $id ?>" method="POST" novalidate>
-                                        <!--begin::Row-->
-                                        <div class="row g-3">
-                                            <!--begin::Col-->
-                                            <div class="col-md-6">
-                                                <label for="evaluacion" class="form-label">Titulo de la Evaluacion</label>
-                                                <input type="text" class="form-control" id="evaluacion" name="evaluacion" value="<?= $evaluacion ?>" autofocus required>
-                                                <div class="valid-feedback">¡Se ve bien!.</div>
-                                            </div>
-                                            <!--end::Col-->
-                                            <!--begin::Col-->
-                                            <div class="col-md-6">
-                                                <label for="departamento" class="form-label">Departamento</label>
-                                                <select class="form-select" id="departamento" name="departamento" required>
-                                                    <option disabled value="">Selecciona un Departamento</option>
-                                                    <?php foreach ($departamento as $departamento) : ?>
-                                                        <option value="<?php echo $departamento['id']; ?>" <?php echo ($departamento['id'] == $id_departamento) ? "selected" : ""; ?>><?php echo ucwords($departamento['departamento']); ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                                <div class="invalid-feedback">
-                                                    Por favor selecciona un grupo.
-                                                </div>
-                                            </div>
-                                            <!--end::Col-->
-                                            <!--begin::Col-->
-                                            <div class="col-md-12">
-                                                <label for="descripcion" class="form-label">Descripcion de la evaluacion</label>
-                                                <textarea name="descripcion" id="descripcion" class="form-control"><?= $descripcion ?></textarea>
-                                            </div>
-                                            <!--end::Col-->
-                                            <!--begin::Col-->
-                                            <div class="col-md-4">
-                                                <label for="fecha" class="form-label">Fecha de inicio</label>
-                                                <input type="date" class="form-control" id="fecha" name="fecha" min="" value="<?= $fecha_inicio ?>" required>
-                                                <div class="valid-feedback">¡Se ve bien!.</div>
-                                            </div>
-                                            <!--end::Col-->
-                                            <!--begin::Col-->
-                                            <div class="col-md-4">
-                                                <label for="fechaend" class="form-label">Fecha de cierre</label>
-                                                <input type="date" class="form-control" id="fechaend" name="fechaend" value="<?= $fecha_cierre ?>">
-                                                <span class="fw-bold" style="font-size: .7rem;">*Dejar vacio si no tiene vigencia</span>
-                                                <div class="valid-feedback">¡Se ve bien!.</div>
-                                                <div class="invalid-feedback">
-                                                    La fecha debe ser igual o mayor a la fecha de inicio.
-                                                </div>
-                                            </div>
-                                            <!--end::Col-->
-                                            <!--begin::Col-->
-                                            <div class="col-md-4">
-                                                <label for="tiempo" class="form-label">Tiempo en minutos</label>
-                                                <input type="number" class="form-control" id="tiempo" name="tiempo" min="10" step="5" value="<?= $tiempo ?>" required>
-                                                <span class="fw-bold" style="font-size: .7rem;">*Dejar vacio para no tener liminte de tiempo</span>
-                                                <div class="valid-feedback">¡Se ve bien!.</div>
-                                            </div>
-                                            <!--end::Col-->
-                                            <input type="text" hidden value="<?= $id ?>" name="id_edit">
-                                            <div class="col-md-12">
-                                                <div class="float-end">
-                                                    <button class="btn btn-success" type="submit" name="edit_evaluacion">Actualizar</button>
-                                                </div>
-                                            </div>
+                                    <h3><?= $evaluacion ?></h3>
+                                    <div class="descripcion">
+                                        <?= $descripcion ?>
+                                    </div>
+                                    <hr>
+                                    <div class="datos d-flex gap-2">
+                                        <div class="incio">
+                                            <p>Fecha de Inicio: <span class="fw-bold"><?= $fecha_inicio ?></span></p>
                                         </div>
-                                        <!--end::Row-->
-                                    </form>
-                                    <!--end::Form-->
+                                        <div class="cierre">
+                                            <p>Fecha de Cierre: <span class="fw-bold"><?= $fecha_cierre ?></span></p>
+                                        </div>
+                                        <div class="tiempo">
+                                            <p>Tiempo en Minutos: <span class="fw-bold"><?= $tiempo ?></span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--end::Body-->
+                                <!--begin::Footer-->
+                                <div class="card-footer">
+                                    <div class="float-end">
+                                        <button type="button" id="editar_evaluacion" class="btn btn-outline-primary">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                            </svg>
+                                            <span>Editar Evaluacion</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!--end::Footer-->
+                                <!--begin::JavaScript-->
+                                <script>
+                                    
+                                </script>
+                                <!--end::JavaScript-->
+                            </div>
+                            <!--end::Form Validation-->
+                        </div>
+                        <!-- Termina el /.col del formulario -->
+                    </div>
+                    <!-- /.row (main row) -->
+                    <div class="row mb-2">
+                        <!-- Empieza el /.col del formulario -->
+                        <div class="col-12">
+                            <!--begin:: Card de agregar pregtas-->
+                            <div class="card card-primary card-outline">
+                                <!--begin::Header-->
+                                <div class="card-header">
+                                    <div class="card-title">Preguntas</div>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                                            <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                                            <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-tool me-2" data-lte-toggle="card-maximize">
+                                            <i data-lte-icon="maximize" class="bi bi-fullscreen"></i>
+                                            <i data-lte-icon="minimize" class="bi bi-fullscreen-exit"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!--end::Header-->
+                                <!--begin::Body-->
+                                <div class="card-body">
                                 </div>
                                 <!--end::Body-->
                                 <!--begin::Footer-->
@@ -305,28 +298,12 @@ include_once('layouts/head.php');
                                     </div>
                                 </div>
                                 <!--end::Footer-->
-                                <!--begin::JavaScript-->
-                                <script>
-                                    (() => {
-                                        "use strict";
-
-                                        const form = document.querySelector(".needs-validation");
-
-                                        form.addEventListener("submit", (event) => {
-                                            if (!form.checkValidity()) {
-                                                event.preventDefault();
-                                                event.stopPropagation();
-                                            }
-                                            form.classList.add("was-validated");
-                                        }, false);
-                                    })();
-                                </script>
-                                <!--end::JavaScript-->
                             </div>
-                            <!--end::Form Validation-->
+                            <!--end:: Card de agregar pregtas-->
                         </div>
-                        <!-- Termina el /.col del formulario -->
+                        <!-- Termina el /.col -->
                     </div>
+                    <!-- /.row (main row) -->
                 </div>
             </div>
             <!--end::Container-->
@@ -339,6 +316,96 @@ include_once('layouts/head.php');
     <?php include_once('layouts/scripts.php'); //scripts 
     ?>
 
+    <!-- Modal -->
+    <div class="modal" id="edit_evaluacion">
+        <style>
+            @media (max-width: 576px) {
+                .modal-dialog {
+                    padding: 0 !important;
+                    margin-right: auto;
+                    margin-left: auto;
+                }
+            }
+        </style>
+        <div class="modal-dialog" style="max-width: 100%;  padding: 0 2rem; ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar evaluacion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form class="needs-validation" action="./evaluacion_detalle.php?id=<?= $id ?>" method="POST" novalidate>
+                    <div class="modal-body">
+                        <!--begin::Row-->
+                        <div class="row g-3">
+                            <!--begin::Col-->
+                            <div class="col-md-6">
+                                <label for="evaluacion" class="form-label">Titulo de la Evaluacion</label>
+                                <input type="text" class="form-control" id="evaluacion" name="evaluacion" value="<?= $evaluacion ?>" autofocus required>
+                                <div class="valid-feedback">¡Se ve bien!.</div>
+                            </div>
+                            <!--end::Col-->
+                            <!--begin::Col-->
+                            <div class="col-md-6">
+                                <label for="departamento" class="form-label">Departamento</label>
+                                <select class="form-select" id="departamento" name="departamento" required>
+                                    <option disabled value="">Selecciona un Departamento</option>
+                                    <?php foreach ($departamento as $departamento) : ?>
+                                        <option value="<?php echo $departamento['id']; ?>" <?php echo ($departamento['id'] == $id_departamento) ? "selected" : ""; ?>><?php echo ucwords($departamento['departamento']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor selecciona un grupo.
+                                </div>
+                            </div>
+                            <!--end::Col-->
+                            <!--begin::Col-->
+                            <div class="col-md-12">
+                                <label for="descripcion" class="form-label">Descripcion de la evaluacion</label>
+                                <textarea name="descripcion" id="descripcion" class="form-control"><?= $descripcion ?></textarea>
+                            </div>
+                            <!--end::Col-->
+                            <!--begin::Col-->
+                            <div class="col-md-4">
+                                <label for="fecha" class="form-label">Fecha de inicio</label>
+                                <input type="date" class="form-control" id="fecha" name="fecha" min="" value="<?= $fecha_inicio ?>" required>
+                                <div class="valid-feedback">¡Se ve bien!.</div>
+                            </div>
+                            <!--end::Col-->
+                            <!--begin::Col-->
+                            <div class="col-md-4">
+                                <label for="fechaend" class="form-label">Fecha de cierre</label>
+                                <input type="date" class="form-control" id="fechaend" name="fechaend" value="<?= $fecha_cierre ?>">
+                                <span class="fw-bold" style="font-size: .7rem;">*Dejar vacio si no tiene vigencia</span>
+                                <div class="valid-feedback">¡Se ve bien!.</div>
+                                <div class="invalid-feedback">
+                                    La fecha debe ser igual o mayor a la fecha de inicio.
+                                </div>
+                            </div>
+                            <!--end::Col-->
+                            <!--begin::Col-->
+                            <div class="col-md-4">
+                                <label for="tiempo" class="form-label">Tiempo en minutos</label>
+                                <input type="number" class="form-control" id="tiempo" name="tiempo" min="10" step="5" value="<?= $tiempo ?>" required>
+                                <span class="fw-bold" style="font-size: .7rem;">*Dejar vacio para no tener liminte de tiempo</span>
+                                <div class="valid-feedback">¡Se ve bien!.</div>
+                            </div>
+                            <!--end::Col-->
+                            <input type="text" hidden value="<?= $id ?>" name="id_edit">
+                        </div>
+                        <!--end::Row-->
+
+                        <!--end::Form-->
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success" type="submit" name="edit_evaluacion">Actualizar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
     <!-- OPTIONAL SCRIPTS -->
     <!-- OPTIONAL SCRIPTS -->
     <!-- jquey -->
@@ -347,6 +414,28 @@ include_once('layouts/head.php');
     <link href="./includes/libs/summernote/summernote-lite.css" rel="stylesheet">
     <script src="./includes/libs/summernote/summernote-lite.js"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const editar_evaluacion = document.getElementById("editar_evaluacion");
+            editar_evaluacion.addEventListener("click", function() {
+                $('#edit_evaluacion').modal('show');
+            });
+
+            (() => {
+                                        "use strict";
+
+                                        const form = document.querySelector(".needs-validation");
+
+                                        form.addEventListener("submit", (event) => {
+                                            if (!form.checkValidity()) {
+                                                event.preventDefault();
+                                                event.stopPropagation();
+                                            }
+                                            form.classList.add("was-validated");
+                                        }, false);
+                                    })();
+        })
+
+
         $('#descripcion').summernote({
             placeholder: 'Agrega una descripcion de la prueba',
             height: 300,
@@ -355,18 +444,24 @@ include_once('layouts/head.php');
                     uploadImage(image[0]);
                 }
             },
+            styleTags: [
+                'p', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre'
+            ],
+            fontNames: ['Segoe UI', 'Arial', 'Arial Black', 'Comic Sans MS', 'Courier New'],
             toolbar: [
                 ['style', ['style']],
-                ['font', ['bold', 'underline', 'clear']],
+                ['font', ['bold', 'underline', 'italic', 'clear']],
+                ['fontname', ['fontname']],
                 ['color', ['color']],
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['table', ['table']],
-                ['insert', ['link', 'picture']],
-                ['view', ['fullscreen', 'codeview']]
+                ['insert', ['link', 'picture', 'hr']],
+                ['view', ['fullscreen','codeview']],
             ]
 
         });
         $('.note-editing-area').css('background-color', '#fff');
+
 
 
 
@@ -453,7 +548,7 @@ include_once('layouts/head.php');
     </script>
 
     <script>
-        
+
     </script>
 </body><!--end::Body-->
 
