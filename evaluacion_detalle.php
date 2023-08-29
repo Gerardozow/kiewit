@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $fecha_cierre = $resultado['fecha_final'];
             $tiempo = $resultado['tiempo'];
             $estatus = $resultado['estatus'];
+            $pregunta_aleatorias = $resultado['preguntas_aleatorias'];
         } else {
             $session->msg('d', 'No existe la evaluacion!');
             redirect('evaluaciones.php', false);
@@ -26,6 +27,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } else {
         redirect('evaluaciones.php', false);
     }
+
+    if (isset($_GET['delete_pregunta'])) {
+        $delete_id = delete_by_id('preguntas', (int)$_GET['delete_pregunta']);
+        if ($delete_id) {
+            $session->msg("s", "Pregunta Eliminada.");
+            redirect('evaluacion_detalle.php?id=' . $_GET['id']);
+        } else {
+            $session->msg("d", "Algo fallo.");
+            redirect('evaluacion_detalle.php?id=' . $_GET['id']);
+        }
+    }
+
+    $pagina = isset($_GET['pagina']) ? intval($_GET['pagina']) : 1;
+    $limit = 10;
+    $offset = ($pagina - 1) * $limit;
+
+    $totalPreguntas = count_questions_by_id($id);
+    $totalPages = ceil($totalPreguntas['total'] / $limit);
+
+    $preguntas = find_with_pagination('preguntas', 'id_evaluacion', $id, $limit, $offset); //
+
 }
 
 
@@ -72,6 +94,34 @@ if (isset($_POST["estado"])) {
         echo "Error al actualizar el estado: " . $db->error;
     }
 }
+
+// Verifica si se recibió el estado en la petición POST para iniciar pregunta ramdom
+if (isset($_POST["estado_pregunta"])) {
+    $estado = intval($_POST["estado_pregunta"]); // Convierte a un número entero
+    $id = $_GET['id'];
+    // Actualiza la base de datos con el nuevo estado
+    $sql = "UPDATE evaluaciones SET preguntas_aleatorias = $estado WHERE id = $id"; // Cambia 'id' según tu necesidad
+    if ($db->query($sql) === TRUE) {
+        echo "Preguntas aleatoarias actualizado correctamente";
+    } else {
+        echo "Error al actualizar el estado: " . $db->error;
+    }
+}
+
+
+//Verifica el cambio de estado de una pregunta
+if (isset($_POST["questionId"])) {
+    $id = $_POST["questionId"];
+    $cheked = $_POST["status"];
+    // Actualiza la base de datos con el nuevo estado
+    $sql = "UPDATE preguntas SET estatus = $cheked WHERE id = $id"; // Cambia 'id' según tu necesidad
+    if ($db->query($sql) === TRUE) {
+        echo "Preguntas aleatoarias actualizado correctamente";
+    } else {
+        echo "Error al actualizar el estado: " . $db->error;
+    }
+}
+
 
 
 $title_page = 'Evaluacuion | ' . $evaluacion;
@@ -144,20 +194,24 @@ include_once('layouts/head.php');
                                 <!--begin::Form-->
                                 <!--begin::Body-->
                                 <div class="card-body">
-                                    <div class="d-flex gap-2">
-                                        <p class="m-0">Estado de evaluacion:</p>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="estatus_prueba" <?php if ($estatus == 1) echo "checked"; ?> />
-                                            <label class="form-check-label" for="estatus_prueba">Prueba <?php echo ($estatus == 1) ? 'Activa' : 'Desactivada'; ?></label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-2">
+                                            <p class="m-0">Estado de evaluacion:</p>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch" id="estatus_prueba" <?php if ($estatus == 1) echo "checked"; ?> />
+                                                <label class="form-check-label" for="estatus_prueba"><?php echo ($estatus == 1) ? 'On' : 'Off'; ?></label>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <p class="m-0">Preguntas Aleatorias:</p>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch" id="random_estatus" <?php if ($pregunta_aleatorias == 1) echo "checked"; ?> />
+                                                <label class="form-check-label" for="random_estatus"><?php echo ($pregunta_aleatorias == 1) ? 'On' : 'Off'; ?></label>
+                                            </div>
                                         </div>
                                     </div>
-
                                 </div>
                                 <!--end::Body-->
-                                <!--begin::Footer-->
-                                <div class="card-footer">
-                                </div>
-                                <!--end::Footer-->
                             </div>
                         </div>
                         <!--begin::Col-->
@@ -165,7 +219,7 @@ include_once('layouts/head.php');
                             <!--begin::Small Box Widget 1-->
                             <div class="small-box text-bg-primary">
                                 <div class="inner">
-                                    <h3>150</h3>
+                                    <h3><?= $totalPreguntas['total'] ?></h3>
 
                                     <p>Preguntas</p>
                                 </div>
@@ -173,8 +227,8 @@ include_once('layouts/head.php');
                                     <path d="M5.933.87a2.89 2.89 0 0 1 4.134 0l.622.638.89-.011a2.89 2.89 0 0 1 2.924 2.924l-.01.89.636.622a2.89 2.89 0 0 1 0 4.134l-.637.622.011.89a2.89 2.89 0 0 1-2.924 2.924l-.89-.01-.622.636a2.89 2.89 0 0 1-4.134 0l-.622-.637-.89.011a2.89 2.89 0 0 1-2.924-2.924l.01-.89-.636-.622a2.89 2.89 0 0 1 0-4.134l.637-.622-.011-.89a2.89 2.89 0 0 1 2.924-2.924l.89.01.622-.636zM7.002 11a1 1 0 1 0 2 0 1 1 0 0 0-2 0zm1.602-2.027c.04-.534.198-.815.846-1.26.674-.475 1.05-1.09 1.05-1.986 0-1.325-.92-2.227-2.262-2.227-1.02 0-1.792.492-2.1 1.29A1.71 1.71 0 0 0 6 5.48c0 .393.203.64.545.64.272 0 .455-.147.564-.51.158-.592.525-.915 1.074-.915.61 0 1.03.446 1.03 1.084 0 .563-.208.885-.822 1.325-.619.433-.926.914-.926 1.64v.111c0 .428.208.745.585.745.336 0 .504-.24.554-.627z" />
                                     </path>
                                 </svg>
-                                <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                                    More info <i class="bi bi-link-45deg"></i>
+                                <a href="#Preguntas" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                    Ver Preguntas <i class="bi bi-link-45deg"></i>
                                 </a>
                             </div>
                             <!--end::Small Box Widget 1-->
@@ -259,7 +313,7 @@ include_once('layouts/head.php');
                                 <!--end::Footer-->
                                 <!--begin::JavaScript-->
                                 <script>
-                                    
+
                                 </script>
                                 <!--end::JavaScript-->
                             </div>
@@ -289,12 +343,84 @@ include_once('layouts/head.php');
                                 </div>
                                 <!--end::Header-->
                                 <!--begin::Body-->
-                                <div class="card-body">
+                                <div id="Preguntas" class="card-body table-responsive p-0">
+                                    <table class="table table-hover text-nowrap">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th class="text-wrap">Pregunta</th>
+                                                <th class="text-wrap" class="text-wrap">Respuesta A</th>
+                                                <th class="text-wrap">Respuesta B</th>
+                                                <th class="text-wrap">Respuesta C</th>
+                                                <th class="text-wrap">Respuesta D</th>
+                                                <th class="text-wrap">Valor</th>
+                                                <th class="text-wrap text-center">Respuesta Correcta</th>
+                                                <th class="text-wrap text-center" style="width: 40px;">Opciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php $i = $offset + 1;
+                                            foreach ($preguntas as $pregunta) : ?>
+                                                <tr class="clickable-row" data-href="./#.php?id=<?= $pregunta['id'] ?>">
+                                                    <td class="align-middle"><?php echo $i;
+                                                                                $i++; ?></td>
+                                                    <td class="text-wrap">
+                                                        <div class="truncate"><?php echo $pregunta['pregunta']; ?></div>
+                                                    </td>
+                                                    <td class="text-wrap">
+                                                        <div class="truncate"><?php echo $pregunta['respuesta_a']; ?></div>
+                                                    </td>
+                                                    <td class="text-wrap">
+                                                        <div class="truncate"><?php echo $pregunta['respuesta_b']; ?></div>
+                                                    </td>
+                                                    <td class="text-wrap">
+                                                        <div class="truncate"><?php echo $pregunta['respuesta_c']; ?></div>
+                                                    </td>
+                                                    <td class="text-wrap">
+                                                        <div class="truncate"><?php echo $pregunta['respuesta_d']; ?></div>
+                                                    </td>
+                                                    <td class="text-center align-middle">10</td>
+                                                    <td class="text-wrap text-center align-middle "><?php echo $pregunta['respuesta_correcta']; ?></td>
+                                                    <td class="align-middle">
+                                                        <ul class="list-group list-group-horizontal justify-content-center gap-2 ">
+                                                            <div class="form-check form-switch">
+                                                                <input class="form-check-input question_id" type="checkbox" role="switch" data-question-href="<?= $pregunta['id'] ?>" <?php if ($pregunta['estatus'] == 1) echo "checked"; ?>/>
+                                                            </div>
+                                                            <a href="./evaluacion_detalle.php?id=<?= $pregunta['id'] ?>" class="fs-6 btn btn-secondary "><i class="bi bi-pencil"></i></a>
+                                                            <a href="./evaluaciones.php?delete_evaluacion=<?php echo $pregunta['id'] ?>" class="fs-6 btn btn-danger px-2 delete-link" data-pregunta-id="<?php echo $pregunta['id'] ?>"><i class="bi bi-trash"></i></a>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
                                 </div>
                                 <!--end::Body-->
                                 <!--begin::Footer-->
                                 <div class="card-footer">
-                                    <div class="float-end">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <p class="m-0">Total de Preguntas <?= $totalPreguntas['total'] ?></p>
+                                        </div>
+                                        <div class="col-6">
+                                            <ul class="pagination pagination-sm m-0 float-end">
+                                                <?php if ($pagina > 1) : ?>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?pagina=<?= $pagina - 1 ?>">&laquo;</a>
+                                                    </li>
+                                                <?php endif; ?>
+                                                <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
+                                                    <li class="page-item <?= ($i === $pagina) ? 'active' : '' ?>">
+                                                        <a class="page-link" href="?pagina=<?= $i ?>"><?= $i ?></a>
+                                                    </li>
+                                                <?php endfor; ?>
+                                                <?php if ($pagina < $totalPages) : ?>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?pagina=<?= $pagina + 1 ?>">&raquo;</a>
+                                                    </li>
+                                                <?php endif; ?>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                                 <!--end::Footer-->
@@ -327,6 +453,8 @@ include_once('layouts/head.php');
                 }
             }
         </style>
+
+        <!-- Modal Editar evaluacion -->
         <div class="modal-dialog" style="max-width: 100%;  padding: 0 2rem; ">
             <div class="modal-content">
                 <div class="modal-header">
@@ -404,7 +532,25 @@ include_once('layouts/head.php');
             </div>
         </div>
     </div>
-
+    <!-- Termina Modal Editar evaluacion -->
+    <!-- Modal confirmacion de eliminacion-->
+    <div class="modal" id="deleteConfirmationModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar esta pregunta?
+                </div>
+                <div class="modal-footer">
+                    <a id="confirmDeleteButton" href="#" class="btn btn-danger">Eliminar</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- OPTIONAL SCRIPTS -->
     <!-- OPTIONAL SCRIPTS -->
@@ -415,24 +561,49 @@ include_once('layouts/head.php');
     <script src="./includes/libs/summernote/summernote-lite.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Obtén todos los enlaces con la clase 'delete-link'
+            const deleteLinks = document.querySelectorAll(".delete-link");
+
+            // Itera sobre los enlaces y agrega un listener de clic a cada uno
+            deleteLinks.forEach(function(link) {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault(); // Evita que el enlace se abra
+
+                    const preguntaId = link.getAttribute("data-pregunta-id"); // Obtiene el ID del usuario
+                    const modal = new bootstrap.Modal(document.getElementById("deleteConfirmationModal")); // Crea una instancia del modal
+                    // Obtiene la URL completa
+                    var urlCompleta = window.location.href;
+                    console.log("URL completa:", urlCompleta);
+
+                    // Actualiza el enlace del botón de confirmación del modal con el ID del usuario
+                    const confirmButton = document.getElementById("confirmDeleteButton");
+                    confirmButton.setAttribute("href", `${urlCompleta}&delete_pregunta=${preguntaId}`);
+
+                    // Muestra el modal
+                    modal.show();
+                });
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
             const editar_evaluacion = document.getElementById("editar_evaluacion");
             editar_evaluacion.addEventListener("click", function() {
                 $('#edit_evaluacion').modal('show');
             });
 
             (() => {
-                                        "use strict";
+                "use strict";
 
-                                        const form = document.querySelector(".needs-validation");
+                const form = document.querySelector(".needs-validation");
 
-                                        form.addEventListener("submit", (event) => {
-                                            if (!form.checkValidity()) {
-                                                event.preventDefault();
-                                                event.stopPropagation();
-                                            }
-                                            form.classList.add("was-validated");
-                                        }, false);
-                                    })();
+                form.addEventListener("submit", (event) => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add("was-validated");
+                }, false);
+            })();
         })
 
 
@@ -456,7 +627,7 @@ include_once('layouts/head.php');
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['table', ['table']],
                 ['insert', ['link', 'picture', 'hr']],
-                ['view', ['fullscreen','codeview']],
+                ['view', ['fullscreen', 'codeview']],
             ]
 
         });
@@ -518,12 +689,12 @@ include_once('layouts/head.php');
             }
         });
         document.addEventListener("DOMContentLoaded", function() {
-            const switchElement = document.getElementById("estatus_prueba");
+            const switchPrueba = document.getElementById("estatus_prueba");
 
-            switchElement.addEventListener("change", function() {
-                const isChecked = switchElement.checked;
+            switchPrueba.addEventListener("change", function() {
+                const isChecked = switchPrueba.checked;
                 const status = isChecked ? 1 : 2;
-                const statusText = isChecked ? "Activa" : "Desactivada";
+                const statusText = isChecked ? "On" : "Off";
 
                 // Envía el estado al servidor mediante una petición fetch
                 fetch(window.location.href, {
@@ -538,11 +709,62 @@ include_once('layouts/head.php');
                         console.log(data); // Respuesta del servidor
                         // Actualiza el texto del label con el nuevo estado
                         const labelElement = document.querySelector("label[for='estatus_prueba']");
-                        labelElement.textContent = "Prueba " + statusText;
+                        labelElement.textContent = statusText;
                     })
                     .catch(error => {
                         console.error("Error:", error);
                     });
+            });
+            const switchPregunta = document.getElementById("random_estatus");
+
+            switchPregunta.addEventListener("change", function() {
+                const isChecked = switchPregunta.checked;
+                const status = isChecked ? 1 : 2;
+                const statusText = isChecked ? "On" : "Off";
+
+                // Envía el estado al servidor mediante una petición fetch
+                fetch(window.location.href, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                        body: "estado_pregunta=" + status,
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log(data); // Respuesta del servidor
+                        // Actualiza el texto del label con el nuevo estado
+                        const labelElement = document.querySelector("label[for='random_estatus']");
+                        labelElement.textContent = statusText;
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+            });
+
+            //Activar preguntas o desactivar
+            var pregunta = document.querySelectorAll('.question_id');
+
+            pregunta.forEach(function(pregunta_id) {
+                pregunta_id.addEventListener('change', function() {
+                    var questionId = this.getAttribute('data-question-href');
+                    var isChecked = this.checked;
+                    var status = isChecked ? 1 : 2;
+                    var urlCompleta = window.location.href;
+
+                    // Envía el estado al servidor mediante una petición fetch
+                    fetch(window.location.href, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                            },
+                            body: "questionId=" + questionId +"&status=" + status,
+                        })
+                        .then(response => response.text())
+                        .catch(error => {
+                            console.error("Error:", error);
+                        });
+                });
             });
         });
     </script>

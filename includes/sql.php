@@ -427,4 +427,31 @@ function update_evaluacion($id,$password)
   $db->query($query2);
 }
 
+/*--------------------------------------------------------------*/
+/* Function for Count id  By table preguntas y filtrando por evaluacion
+/*--------------------------------------------------------------*/
+
+function count_questions_by_id($id)
+{
+  global $db;
+  if (tableExists('preguntas')) {
+    $sql    = "SELECT COUNT(id) AS total FROM preguntas WHERE id_evaluacion = ". $db->escape($id);
+    $result = $db->query($sql);
+    return ($db->fetch_assoc($result));
+  }
+}
+
+/*--------------------------------------------------------------*/
+/* Function para buscar con paginacion
+/*--------------------------------------------------------------*/
+
+function find_with_pagination($table,$indice,$id,$limit, $offset)
+{
+  global $db;
+  $sql = $db->query("SELECT * FROM $table WHERE $indice = $id LIMIT $limit OFFSET $offset");
+  // Cambia fetch_assoc a fetch_all para obtener todos los resultados
+  $result = $sql->fetch_all(MYSQLI_ASSOC);
+
+  return $result;
+}
 ?>
