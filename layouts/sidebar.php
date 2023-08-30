@@ -61,7 +61,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link <?php echo page_active('candidatos') ?>">
+                            <a href="./candidatos.php" class="nav-link <?php echo page_active('candidatos') ?>">
                                 <i class="nav-icon bi bi-person-vcard-fill"></i>
                                 <p>Candidatos</p>
                             </a>

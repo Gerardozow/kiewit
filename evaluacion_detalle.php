@@ -957,6 +957,7 @@ include_once('layouts/head.php');
                 ]
 
             });
+            $('.note-editing-area').css('background-color', '#fff');
         }
         summer_preguntas();
         $('.note-editing-area').css('background-color', '#fff');

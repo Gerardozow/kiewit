@@ -11,7 +11,7 @@ $title_page = "Login | Kiewit";
         <div class="card card-outline card-primary">
             <div class="card-header">
                 <a href="index.php" class="link-dark text-center link-offset-2 link-opacity-100 link-opacity-50-hover">
-                    <h1 class="mb-0">
+                    <h1 class="text-warning text-uppercase mb-0">
                         Kiewit
                     </h1>
                 </a>
