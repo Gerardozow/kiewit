@@ -77,52 +77,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             $session->msg("d", $errors);
-            redirect('evaluaciones.php', false);
+            redirect('evaluacion_detalle.php?id=' . $id, false);
+        }
+    }
+
+    if (isset($_POST['add_pregunta'])) {
+        $req_fields = array('pregunta', 'respuesta_a', 'respuesta_a', 'respuesta_a', 'respuesta_a', 'respuesta_correcta','valor');
+        validate_fields($req_fields);
+        $pregunta = $_POST['pregunta'];
+        $respuesta_a = remove_junk($db->escape($_POST['respuesta_a']));
+        $respuesta_b = remove_junk($db->escape($_POST['respuesta_b']));
+        $respuesta_c = remove_junk($db->escape($_POST['respuesta_c']));
+        $respuesta_d = remove_junk($db->escape($_POST['respuesta_d']));
+        $respuesta_correcta = remove_junk($db->escape($_POST['respuesta_correcta']));
+        $valor = intval(remove_junk($db->escape($_POST['valor'])));
+        $id_evaluacion =$_GET['id'];
+        $estatus = 1;
+
+
+        if (empty($errors)) {
+            echo 'Sin errores';
+            $query = "INSERT INTO preguntas (id, id_evaluacion, pregunta, respuesta_a, respuesta_b, respuesta_c, respuesta_d, respuesta_correcta, valor, estatus) VALUES (NULL,'{$id_evaluacion}','{$pregunta}', '{$respuesta_a}', '{$respuesta_b}', '{$respuesta_c}', '{$respuesta_d}', '{$respuesta_correcta}', '{$valor}', '{$estatus}')";
+            if ($db->query($query)) {
+                //sucess
+                $session->msg('s', "Pregunta agregada correctamente!");
+                redirect('./evaluacion_detalle.php?id=' . $id_evaluacion, false);
+            } else {
+                //failed
+                $session->msg('d', 'Lo sentimos, ¡no se agrego la pregunta!');
+                redirect('evaluacion_detalle.php?id=' . $id_evaluacion, false);
+            }
+        } else {
+            $session->msg("d", $errors);
+            redirect('evaluacion_detalle.php?id=' . $id_evaluacion, false);
+        }
+    }
+
+
+    // Verifica si se recibió el estado en la petición POST
+    if (isset($_POST["estado"])) {
+        $estado = intval($_POST["estado"]); // Convierte a un número entero
+        $id = $_GET['id'];
+        // Actualiza la base de datos con el nuevo estado
+        $sql = "UPDATE evaluaciones SET estatus = $estado WHERE id = $id"; // Cambia 'id' según tu necesidad
+        if ($db->query($sql) === TRUE) {
+            echo "Estado actualizado correctamente";
+        } else {
+            echo "Error al actualizar el estado: " . $db->error;
+        }
+    }
+
+    // Verifica si se recibió el estado en la petición POST para iniciar pregunta ramdom
+    if (isset($_POST["estado_pregunta"])) {
+        $estado = intval($_POST["estado_pregunta"]); // Convierte a un número entero
+        $id = $_GET['id'];
+        // Actualiza la base de datos con el nuevo estado
+        $sql = "UPDATE evaluaciones SET preguntas_aleatorias = $estado WHERE id = $id"; // Cambia 'id' según tu necesidad
+        if ($db->query($sql) === TRUE) {
+            echo "Preguntas aleatoarias actualizado correctamente";
+        } else {
+            echo "Error al actualizar el estado: " . $db->error;
+        }
+    }
+
+
+    //Verifica el cambio de estado de una pregunta
+    if (isset($_POST["questionId"])) {
+        $id = $_POST["questionId"];
+        $cheked = $_POST["status"];
+        // Actualiza la base de datos con el nuevo estado
+        $sql = "UPDATE preguntas SET estatus = $cheked WHERE id = $id"; // Cambia 'id' según tu necesidad
+        if ($db->query($sql) === TRUE) {
+            echo "Preguntas aleatoarias actualizado correctamente";
+        } else {
+            echo "Error al actualizar el estado: " . $db->error;
         }
     }
 }
-
-// Verifica si se recibió el estado en la petición POST
-if (isset($_POST["estado"])) {
-    $estado = intval($_POST["estado"]); // Convierte a un número entero
-    $id = $_GET['id'];
-    // Actualiza la base de datos con el nuevo estado
-    $sql = "UPDATE evaluaciones SET estatus = $estado WHERE id = $id"; // Cambia 'id' según tu necesidad
-    if ($db->query($sql) === TRUE) {
-        echo "Estado actualizado correctamente";
-    } else {
-        echo "Error al actualizar el estado: " . $db->error;
-    }
-}
-
-// Verifica si se recibió el estado en la petición POST para iniciar pregunta ramdom
-if (isset($_POST["estado_pregunta"])) {
-    $estado = intval($_POST["estado_pregunta"]); // Convierte a un número entero
-    $id = $_GET['id'];
-    // Actualiza la base de datos con el nuevo estado
-    $sql = "UPDATE evaluaciones SET preguntas_aleatorias = $estado WHERE id = $id"; // Cambia 'id' según tu necesidad
-    if ($db->query($sql) === TRUE) {
-        echo "Preguntas aleatoarias actualizado correctamente";
-    } else {
-        echo "Error al actualizar el estado: " . $db->error;
-    }
-}
-
-
-//Verifica el cambio de estado de una pregunta
-if (isset($_POST["questionId"])) {
-    $id = $_POST["questionId"];
-    $cheked = $_POST["status"];
-    // Actualiza la base de datos con el nuevo estado
-    $sql = "UPDATE preguntas SET estatus = $cheked WHERE id = $id"; // Cambia 'id' según tu necesidad
-    if ($db->query($sql) === TRUE) {
-        echo "Preguntas aleatoarias actualizado correctamente";
-    } else {
-        echo "Error al actualizar el estado: " . $db->error;
-    }
-}
-
-
 
 $title_page = 'Evaluacuion | ' . $evaluacion;
 //Menus Sidebar
@@ -331,6 +362,9 @@ include_once('layouts/head.php');
                                 <div class="card-header">
                                     <div class="card-title">Preguntas</div>
                                     <div class="card-tools">
+                                        <button type="button" class="btn btn-primary btn-sm" id="add_pregunta"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"></path>
+                                            </svg> Agregar Pregunta </button>
                                         <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
                                             <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
                                             <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
@@ -361,11 +395,11 @@ include_once('layouts/head.php');
                                         <tbody>
                                             <?php $i = $offset + 1;
                                             foreach ($preguntas as $pregunta) : ?>
-                                                <tr class="clickable-row" data-href="./#.php?id=<?= $pregunta['id'] ?>">
+                                                <tr>
                                                     <td class="align-middle"><?php echo $i;
                                                                                 $i++; ?></td>
                                                     <td class="text-wrap">
-                                                        <div class="truncate"><?php echo $pregunta['pregunta']; ?></div>
+                                                        <div class="truncate"><?php echo remove_junk($pregunta['pregunta']); ?></div>
                                                     </td>
                                                     <td class="text-wrap">
                                                         <div class="truncate"><?php echo $pregunta['respuesta_a']; ?></div>
@@ -384,10 +418,10 @@ include_once('layouts/head.php');
                                                     <td class="align-middle">
                                                         <ul class="list-group list-group-horizontal justify-content-center gap-2 ">
                                                             <div class="form-check form-switch">
-                                                                <input class="form-check-input question_id" type="checkbox" role="switch" data-question-href="<?= $pregunta['id'] ?>" <?php if ($pregunta['estatus'] == 1) echo "checked"; ?>/>
+                                                                <input class="form-check-input question_id" type="checkbox" role="switch" data-question-href="<?= $pregunta['id'] ?>" <?php if ($pregunta['estatus'] == 1) echo "checked"; ?> />
                                                             </div>
-                                                            <a href="./evaluacion_detalle.php?id=<?= $pregunta['id'] ?>" class="fs-6 btn btn-secondary "><i class="bi bi-pencil"></i></a>
-                                                            <a href="./evaluaciones.php?delete_evaluacion=<?php echo $pregunta['id'] ?>" class="fs-6 btn btn-danger px-2 delete-link" data-pregunta-id="<?php echo $pregunta['id'] ?>"><i class="bi bi-trash"></i></a>
+                                                            <a href="./evaluacion_detalle.php?id=<?= $pregunta['id'] ?>" class="btn btn-secondary "><i class="bi bi-pencil"></i></a>
+                                                            <a href="./evaluaciones.php?delete_evaluacion=<?php echo $pregunta['id'] ?>" class="btn btn-danger delete-link" data-pregunta-id="<?php echo $pregunta['id'] ?>"><i class="bi bi-trash"></i></a>
                                                         </ul>
                                                     </td>
                                                 </tr>
@@ -442,7 +476,7 @@ include_once('layouts/head.php');
     <?php include_once('layouts/scripts.php'); //scripts 
     ?>
 
-    <!-- Modal -->
+    <!-- Modal Editar evaluacion -->
     <div class="modal" id="edit_evaluacion">
         <style>
             @media (max-width: 576px) {
@@ -453,8 +487,6 @@ include_once('layouts/head.php');
                 }
             }
         </style>
-
-        <!-- Modal Editar evaluacion -->
         <div class="modal-dialog" style="max-width: 100%;  padding: 0 2rem; ">
             <div class="modal-content">
                 <div class="modal-header">
@@ -551,6 +583,70 @@ include_once('layouts/head.php');
             </div>
         </div>
     </div>
+    <!-- Termina Modal confirmacion de eliminacion-->
+    <!-- Modal Agregar Pregunta -->
+    <div class="modal" id="add_pregunta_modal">
+        <div class="modal-dialog" style="max-width: 100%;  padding: 0 2rem;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Pregunta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="" method="post">
+                    <div class="modal-body">
+                        <div class="row g-3 mb-3">
+                            <!--begin::Pregunta-->
+                            <div class="col-md-12">
+                                <label for="pregunta" class="form-label">Pregunta</label>
+                                <textarea name="pregunta" id="pregunta" class="form-control"></textarea>
+                            </div>
+                            <!--end::Pregunta-->
+                            <!--begin::Respuestas-->
+                            <div class="col-md-6">
+                                <label for="respuesta_a" class="form-label">Respuesta A</label>
+                                <textarea class="form-control" name="respuesta_a" id="respuesta_a" cols="30" require></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="respuesta_b" class="form-label">Respuesta B</label>
+                                <textarea class="form-control" name="respuesta_b" id="respuesta_b" cols="30" require></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="respuesta_c" class="form-label">Respuesta C</label>
+                                <textarea class="form-control" name="respuesta_c" id="respuesta_c" cols="30" require></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="respuesta_d" class="form-label">Respuesta D</label>
+                                <textarea class="form-control" name="respuesta_d" id="respuesta_d" cols="30" require></textarea>
+                            </div>
+                            <!--end::Respuesta-->
+                            <!--begin::Respuesta Correcta-->
+                            <div class="col-md-3">
+                                <label for="respuesta_correcta" class="form-label">Respuesta Correcta</label>
+                                <select class="form-select" id="respuesta_correcta" name="respuesta_correcta" required>
+                                    <option disabled selected value="">Selecciona un Respuesta</option>
+                                    <option value="a">A</option>
+                                    <option value="b">B</option>
+                                    <option value="c">C</option>
+                                    <option value="d">D</option>
+                                </select>
+                            </div>
+                            <!--end::Respuesta Correcta-->
+                            <!--begin::Valor-->
+                            <div class="col-md-3">
+                                <label for="valor" class="form-label">Valor de la Pregunta del 1 al 10</label>
+                                <input type="number" class="form-control" id="valor" name="valor" min="1" max="10" step="1" value="1" required>
+                            </div>
+                            <!--end::Valor-->
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-success" type="submit" name="add_pregunta">Enviar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Termina Modal Agregar Pregunta -->
 
     <!-- OPTIONAL SCRIPTS -->
     <!-- OPTIONAL SCRIPTS -->
@@ -604,6 +700,11 @@ include_once('layouts/head.php');
                     form.classList.add("was-validated");
                 }, false);
             })();
+
+            const add_pregunta = document.getElementById("add_pregunta");
+            add_pregunta.addEventListener("click", function() {
+                $('#add_pregunta_modal').modal('show');
+            });
         })
 
 
@@ -627,7 +728,31 @@ include_once('layouts/head.php');
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['table', ['table']],
                 ['insert', ['link', 'picture', 'hr']],
-                ['view', ['fullscreen', 'codeview']],
+                ['view', ['fullscreen']],
+            ]
+
+        });
+        $('#pregunta').summernote({
+            placeholder: 'Agrega la pregunta',
+            height: 150,
+            callbacks: {
+                onImageUpload: function(image, editor, welEditable) {
+                    uploadImage(image[0]);
+                }
+            },
+            styleTags: [
+                'p', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre'
+            ],
+            fontNames: ['Segoe UI', 'Arial', 'Arial Black', 'Comic Sans MS', 'Courier New'],
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'italic', 'clear']],
+                ['fontname', ['fontname']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture', 'hr']],
+                ['view', ['fullscreen']],
             ]
 
         });
@@ -758,7 +883,7 @@ include_once('layouts/head.php');
                             headers: {
                                 "Content-Type": "application/x-www-form-urlencoded",
                             },
-                            body: "questionId=" + questionId +"&status=" + status,
+                            body: "questionId=" + questionId + "&status=" + status,
                         })
                         .then(response => response.text())
                         .catch(error => {
