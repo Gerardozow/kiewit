@@ -39,6 +39,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
     }
 
+
+
+    if (isset($_GET['editar_pregunta'])) {
+        $id_pregunta = $_GET['editar_pregunta'];
+        $pregunta_data = find_by_id('preguntas', $id_pregunta);
+        $pregunta = $pregunta_data['pregunta'];
+        $respuesta_a = $pregunta_data['respuesta_a'];
+        $respuesta_b = $pregunta_data['respuesta_b'];
+        $respuesta_c = $pregunta_data['respuesta_c'];
+        $respuesta_d = $pregunta_data['respuesta_d'];
+        $respuesta_correcta = $pregunta_data['respuesta_correcta'];
+        $valor = $pregunta_data['valor'];
+        $data = [
+            'id_pregunta' => $id_pregunta,
+            'pregunta' => $pregunta,
+            'respuesta_a' => $respuesta_a,
+            'respuesta_b' => $respuesta_b,
+            'respuesta_c' => $respuesta_c,
+            'respuesta_d' => $respuesta_d,
+            'respuesta_correcta' => $respuesta_correcta,
+            'valor' => $valor
+        ];
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     $pagina = isset($_GET['pagina']) ? intval($_GET['pagina']) : 1;
     $limit = 10;
     $offset = ($pagina - 1) * $limit;
@@ -81,9 +109,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if (isset($_POST['add_pregunta'])) {
-        $req_fields = array('pregunta', 'respuesta_a', 'respuesta_a', 'respuesta_a', 'respuesta_a', 'respuesta_correcta','valor');
+    if (isset($_POST['edit_pregunta'])) {
+        $req_fields = array('respuesta_a_edit', 'respuesta_b_edit', 'respuesta_c_edit', 'respuesta_d_edit', 'respuesta_correcta_edit', 'valor_edit');
+
         validate_fields($req_fields);
+        $pregunta = $_POST['pregunta_edit'];
+        if (empty($pregunta)) {
+            $query = "SELECT pregunta FROM preguntas WHERE id = {$_POST['id_pregunta']}";
+            $result = $db->query($query);
+            $pregunta = $result->fetch_assoc()['pregunta'];
+        }
+        $respuesta_a = remove_junk($db->escape($_POST['respuesta_a_edit']));
+        $respuesta_b = remove_junk($db->escape($_POST['respuesta_b_edit']));
+        $respuesta_c = remove_junk($db->escape($_POST['respuesta_c_edit']));
+        $respuesta_d = remove_junk($db->escape($_POST['respuesta_d_edit']));
+        $respuesta_correcta = remove_junk($db->escape($_POST['respuesta_correcta_edit']));
+        $valor = intval(remove_junk($db->escape($_POST['valor_edit'])));
+        $id_evaluacion = $_GET['id'];
+        $id_pregunta = $_POST['id_pregunta'];
+
+
+        if (empty($errors)) {
+            echo 'Sin errores';
+            $query = "UPDATE preguntas SET pregunta = '{$pregunta}', respuesta_a = '{$respuesta_a}', respuesta_b = '{$respuesta_b}', respuesta_c = '{$respuesta_c}', respuesta_d = '{$respuesta_d}', respuesta_correcta = '{$respuesta_correcta}', valor = '{$valor}' WHERE preguntas.id = $id_pregunta";
+            if ($db->query($query)) {
+                //sucess
+                $session->msg('s', "Pregunta editada correctamente!");
+                redirect('./evaluacion_detalle.php?id=' . $id_evaluacion, false);
+            } else {
+                //failed
+                $session->msg('d', 'Lo sentimos, ¡no se edito la pregunta!');
+                redirect('evaluacion_detalle.php?id=' . $id_evaluacion, false);
+            }
+        } else {
+            $session->msg("d", $errors);
+            redirect('evaluacion_detalle.php?id=' . $id_evaluacion, false);
+        }
+    }
+
+    if (isset($_POST['add_pregunta'])) {
+        $req_fields = array('pregunta', 'respuesta_a', 'respuesta_a', 'respuesta_a', 'respuesta_a', 'respuesta_correcta', 'valor');
+        validate_fields($req_fields);
+
         $pregunta = $_POST['pregunta'];
         $respuesta_a = remove_junk($db->escape($_POST['respuesta_a']));
         $respuesta_b = remove_junk($db->escape($_POST['respuesta_b']));
@@ -91,9 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $respuesta_d = remove_junk($db->escape($_POST['respuesta_d']));
         $respuesta_correcta = remove_junk($db->escape($_POST['respuesta_correcta']));
         $valor = intval(remove_junk($db->escape($_POST['valor'])));
-        $id_evaluacion =$_GET['id'];
-        $estatus = 1;
-
+        $id_evaluacion = $_GET['id'];
+        $estatus = 2;
 
         if (empty($errors)) {
             echo 'Sin errores';
@@ -389,39 +455,50 @@ include_once('layouts/head.php');
                                                 <th class="text-wrap">Respuesta D</th>
                                                 <th class="text-wrap">Valor</th>
                                                 <th class="text-wrap text-center">Respuesta Correcta</th>
+                                                <th class="text-wrap text-center" style="width: 40px;">Obligatoria</th>
                                                 <th class="text-wrap text-center" style="width: 40px;">Opciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php $i = $offset + 1;
-                                            foreach ($preguntas as $pregunta) : ?>
+                                            foreach ($preguntas as $pregunta_ind) : ?>
                                                 <tr>
                                                     <td class="align-middle"><?php echo $i;
                                                                                 $i++; ?></td>
                                                     <td class="text-wrap">
-                                                        <div class="truncate"><?php echo remove_junk($pregunta['pregunta']); ?></div>
+                                                        <div class="truncate"><?php echo remove_junk($pregunta_ind['pregunta']); ?></div>
                                                     </td>
                                                     <td class="text-wrap">
-                                                        <div class="truncate"><?php echo $pregunta['respuesta_a']; ?></div>
+                                                        <div class="truncate"><?php echo $pregunta_ind['respuesta_a']; ?></div>
                                                     </td>
                                                     <td class="text-wrap">
-                                                        <div class="truncate"><?php echo $pregunta['respuesta_b']; ?></div>
+                                                        <div class="truncate"><?php echo $pregunta_ind['respuesta_b']; ?></div>
                                                     </td>
                                                     <td class="text-wrap">
-                                                        <div class="truncate"><?php echo $pregunta['respuesta_c']; ?></div>
+                                                        <div class="truncate"><?php echo $pregunta_ind['respuesta_c']; ?></div>
                                                     </td>
                                                     <td class="text-wrap">
-                                                        <div class="truncate"><?php echo $pregunta['respuesta_d']; ?></div>
+                                                        <div class="truncate"><?php echo $pregunta_ind['respuesta_d']; ?></div>
                                                     </td>
                                                     <td class="text-center align-middle">10</td>
-                                                    <td class="text-wrap text-center align-middle "><?php echo $pregunta['respuesta_correcta']; ?></td>
+                                                    <td class="text-wrap text-center align-middle "><?php echo strtoupper($pregunta_ind['respuesta_correcta']); ?></td>
+                                                    <td class="align-middle ">
+                                                        <div class="d-flex justify-content-center">
+                                                            <div class="form-check form-switch">
+                                                                <input class="form-check-input question_id" type="checkbox" role="switch" data-question-href="<?= $pregunta_ind['id'] ?>" <?php if ($pregunta_ind['estatus'] == 1) echo "checked"; ?> />
+                                                            </div>
+                                                        </div>
+                                                    </td>
                                                     <td class="align-middle">
                                                         <ul class="list-group list-group-horizontal justify-content-center gap-2 ">
-                                                            <div class="form-check form-switch">
-                                                                <input class="form-check-input question_id" type="checkbox" role="switch" data-question-href="<?= $pregunta['id'] ?>" <?php if ($pregunta['estatus'] == 1) echo "checked"; ?> />
-                                                            </div>
-                                                            <a href="./evaluacion_detalle.php?id=<?= $pregunta['id'] ?>" class="btn btn-secondary "><i class="bi bi-pencil"></i></a>
-                                                            <a href="./evaluaciones.php?delete_evaluacion=<?php echo $pregunta['id'] ?>" class="btn btn-danger delete-link" data-pregunta-id="<?php echo $pregunta['id'] ?>"><i class="bi bi-trash"></i></a>
+                                                            <a href="#" class="btn btn-secondary edit_pregunta btn-sm" data-pregunta-id="<?php echo $pregunta_ind['id'] ?>"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                                                </svg></a>
+                                                            <a href="#" class="btn btn-danger delete-link btn-sm" data-pregunta-id="<?php echo $pregunta_ind['id'] ?>"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z" />
+                                                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z" />
+                                                                </svg></a>
                                                         </ul>
                                                     </td>
                                                 </tr>
@@ -440,17 +517,17 @@ include_once('layouts/head.php');
                                             <ul class="pagination pagination-sm m-0 float-end">
                                                 <?php if ($pagina > 1) : ?>
                                                     <li class="page-item">
-                                                        <a class="page-link" href="?pagina=<?= $pagina - 1 ?>">&laquo;</a>
+                                                        <a class="page-link" href="?id=<?= $id ?>&pagina=<?= $pagina - 1 ?>">&laquo;</a>
                                                     </li>
                                                 <?php endif; ?>
                                                 <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
                                                     <li class="page-item <?= ($i === $pagina) ? 'active' : '' ?>">
-                                                        <a class="page-link" href="?pagina=<?= $i ?>"><?= $i ?></a>
+                                                        <a class="page-link" href="?id=<?= $id ?>&pagina=<?= $i ?>"><?= $i ?></a>
                                                     </li>
                                                 <?php endfor; ?>
                                                 <?php if ($pagina < $totalPages) : ?>
                                                     <li class="page-item">
-                                                        <a class="page-link" href="?pagina=<?= $pagina + 1 ?>">&raquo;</a>
+                                                        <a class="page-link" href="?id=<?= $id ?>&pagina=<?= $pagina + 1 ?>">&raquo;</a>
                                                     </li>
                                                 <?php endif; ?>
                                             </ul>
@@ -598,7 +675,7 @@ include_once('layouts/head.php');
                             <!--begin::Pregunta-->
                             <div class="col-md-12">
                                 <label for="pregunta" class="form-label">Pregunta</label>
-                                <textarea name="pregunta" id="pregunta" class="form-control"></textarea>
+                                <textarea name="pregunta" id="pregunta" class="form-control pregunta_summer"></textarea>
                             </div>
                             <!--end::Pregunta-->
                             <!--begin::Respuestas-->
@@ -642,6 +719,72 @@ include_once('layouts/head.php');
                             <button class="btn btn-success" type="submit" name="add_pregunta">Enviar</button>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Termina Modal Agregar Pregunta -->
+    <!-- Modal Agregar Pregunta -->
+    <div class="modal" id="edit_pregunta_modal">
+        <div class="modal-dialog" style="max-width: 100%;  padding: 0 2rem;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Pregunta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="" method="POST">
+                    <div class="modal-body">
+                        <div class="row g-3 mb-3">
+                            <!--begin::Pregunta-->
+                            <div class="col-md-12">
+                                <label class="form-label">Pregunta</label>
+                                <div id="pregunta_edit_text_area"></div>
+                            </div>
+                            <!--end::Pregunta-->
+                            <!--begin::Respuestas-->
+                            <div class="col-md-6">
+                                <label for="respuesta_a_edit" class="form-label">Respuesta A</label>
+                                <textarea class="form-control" name="respuesta_a_edit" id="respuesta_a_edit" cols="30" require></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="respuesta_b_edit" class="form-label">Respuesta B</label>
+                                <textarea class="form-control" name="respuesta_b_edit" id="respuesta_b_edit" cols="30" require></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="respuesta_c_edit" class="form-label">Respuesta C</label>
+                                <textarea class="form-control" name="respuesta_c_edit" id="respuesta_c_edit" cols="30" require></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="respuesta_d_edit" class="form-label">Respuesta D</label>
+                                <textarea class="form-control" name="respuesta_d_edit" id="respuesta_d_edit" cols="30" require></textarea>
+                            </div>
+                            <!--end::Respuesta-->
+                            <!--begin::Respuesta Correcta-->
+                            <div class="col-md-3">
+                                <label for="respuesta_correcta_edit" class="form-label">Respuesta Correcta</label>
+                                <select class="form-select" id="respuesta_correcta_edit" name="respuesta_correcta_edit" required>
+                                    <option disabled selected value="">Selecciona un Respuesta</option>
+                                    <option value="a">A</option>
+                                    <option value="b">B</option>
+                                    <option value="c">C</option>
+                                    <option value="d">D</option>
+                                </select>
+                            </div>
+                            <!--end::Respuesta Correcta-->
+                            <!--begin::Valor-->
+                            <div class="col-md-3">
+                                <label for="valor_edit" class="form-label">Valor de la Pregunta del 1 al 10</label>
+                                <input type="number" class="form-control" id="valor_edit" name="valor_edit" min="1" max="10" step="1" value="1" required>
+                            </div>
+                            <!--end::Valor-->
+                            <input type="text" id="id_pregunta" name="id_pregunta" value="" hidden>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" name="edit_pregunta">Enviar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -677,6 +820,62 @@ include_once('layouts/head.php');
 
                     // Muestra el modal
                     modal.show();
+                });
+            });
+
+
+            // Obtén todos los enlaces con la clase 'edit_pregunta'
+            const edit_pregunta = document.querySelectorAll(".edit_pregunta");
+
+            edit_pregunta.forEach(function(link) {
+                link.addEventListener("click", async function(event) {
+                    event.preventDefault();
+
+                    const preguntaId = link.getAttribute("data-pregunta-id");
+                    var url = window.location.href;
+                    var urlCompleta = url.split("#")[0]
+                    console.log("URL completa:", urlCompleta);
+
+                    const response = await fetch(`${urlCompleta}&editar_pregunta=${preguntaId}`);
+                    console.log(response);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const {
+                            id_pregunta,
+                            pregunta,
+                            repuesta_a,
+                            repuesta_b,
+                            repuesta_c,
+                            repuesta_d,
+                            repuesta_correcta,
+                            valor
+                        } = data;
+
+                        document.getElementById("pregunta_edit_text_area").innerHTML = '<textarea name="pregunta_edit" id="pregunta_edit" class="form-control pregunta_summer">' + data.pregunta + '</textarea>';
+                        summer_preguntas();
+                        document.getElementById("respuesta_a_edit").value = data.respuesta_a;
+                        document.getElementById("respuesta_b_edit").value = data.respuesta_b;
+                        document.getElementById("respuesta_c_edit").value = data.respuesta_c;
+                        document.getElementById("respuesta_d_edit").value = data.respuesta_d;
+
+                        var selectElement = document.getElementById("respuesta_correcta_edit");
+                        var valorDeseado = data.respuesta_correcta;
+                        for (var i = 0; i < selectElement.options.length; i++) {
+                            if (selectElement.options[i].value === valorDeseado) {
+                                selectElement.selectedIndex = i;
+                                break;
+                            }
+                        }
+
+                        document.getElementById("valor_edit").value = data.valor;
+                        document.getElementById("id_pregunta").value = data.id_pregunta;
+
+
+                        const modal = new bootstrap.Modal(document.getElementById("edit_pregunta_modal"));
+                        modal.show();
+                    } else {
+                        console.error("Error en la solicitud GET");
+                    }
                 });
             });
         });
@@ -732,30 +931,34 @@ include_once('layouts/head.php');
             ]
 
         });
-        $('#pregunta').summernote({
-            placeholder: 'Agrega la pregunta',
-            height: 150,
-            callbacks: {
-                onImageUpload: function(image, editor, welEditable) {
-                    uploadImage(image[0]);
-                }
-            },
-            styleTags: [
-                'p', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre'
-            ],
-            fontNames: ['Segoe UI', 'Arial', 'Arial Black', 'Comic Sans MS', 'Courier New'],
-            toolbar: [
-                ['style', ['style']],
-                ['font', ['bold', 'underline', 'italic', 'clear']],
-                ['fontname', ['fontname']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['table', ['table']],
-                ['insert', ['link', 'picture', 'hr']],
-                ['view', ['fullscreen']],
-            ]
 
-        });
+        function summer_preguntas() {
+            $('.pregunta_summer').summernote({
+                placeholder: 'Agrega la pregunta',
+                height: 150,
+                callbacks: {
+                    onImageUpload: function(image, editor, welEditable) {
+                        uploadImage(image[0]);
+                    }
+                },
+                styleTags: [
+                    'p', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre'
+                ],
+                fontNames: ['Segoe UI', 'Arial', 'Arial Black', 'Comic Sans MS', 'Courier New'],
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'italic', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'hr']],
+                    ['view', ['fullscreen', 'codeview']],
+                ]
+
+            });
+        }
+        summer_preguntas();
         $('.note-editing-area').css('background-color', '#fff');
 
 
