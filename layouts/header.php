@@ -15,16 +15,15 @@
             </li>
         </ul>
         <!--end::Start Navbar Links-->
-
         <!--begin::End Navbar Links-->
         <ul class="navbar-nav ms-auto">
             <!-- begin theme change -->
             <li class="nav-item dropdown">
-                <button class="btn btn-link nav-link py-2 px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static">
+                <button class="btn btn-link nav-link py-2 px-0 px-lg-2  d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static">
                     <span class="theme-icon-active">
                         <i class="my-1"></i>
                     </span>
-                    <span class="d-lg-none ms-2" id="bd-theme-text">Toggle theme</span>
+                    <span class="d-lg-none ms-2" id="bd-theme-text"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text" style="--bs-dropdown-min-width: 8rem;">
                     <li>
@@ -52,7 +51,7 @@
             </li>
             <!-- end theme change -->
             <!--begin::User Menu Dropdown-->
-            <li class="nav-item dropdown user-menu">
+            <li class="nav-item dropdown  user-menu">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                     <?php
                     $imagePath = "./uploads/users/" . $user['image'];
@@ -89,7 +88,7 @@
                     <!--end::Menu Footer-->
                 </ul>
             </li>
-            <!--end::User Menu Dropdown-->
+            <!--end::User Menu Dropdown-->           
         </ul>
         <!--end::End Navbar Links-->
     </div>

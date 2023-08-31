@@ -17,6 +17,7 @@
     <!--begin::Third Party Plugin(Bootstrap Icons)-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" integrity="sha256-BicZsQAhkGHIoR//IB2amPN5SrRb3fHB8tFsnqRAwnk=" crossorigin="anonymous">
     <!--end::Third Party Plugin(Bootstrap Icons)-->
+    <link href="./includes/libs/datatables/datatables.min.css" rel="stylesheet">
     <!--begin::Required Plugin(AdminLTE)-->
     <link rel="stylesheet" href="./dist/css/adminlte.css">
     <!--end::Required Plugin(AdminLTE)-->

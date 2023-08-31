@@ -7,6 +7,13 @@
 <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js" integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa" crossorigin="anonymous"></script>
 
+<script src="./dist/js/jquery.js"></script>
+
+<script src="./includes/libs/datatables/datatables.min.js"></script>
+
+<link href="./includes/libs/summernote/summernote-lite.css" rel="stylesheet">
+<script src="./includes/libs/summernote/summernote-lite.js"></script>
+
 <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
 <script src="./dist/js/adminlte.js"></script>
 <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->

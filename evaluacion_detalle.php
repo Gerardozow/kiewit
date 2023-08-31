@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     $pagina = isset($_GET['pagina']) ? intval($_GET['pagina']) : 1;
-    $limit = 10;
+    $limit = 9999;
     $offset = ($pagina - 1) * $limit;
 
     $totalPreguntas = count_questions_by_id($id);
@@ -443,8 +443,8 @@ include_once('layouts/head.php');
                                 </div>
                                 <!--end::Header-->
                                 <!--begin::Body-->
-                                <div id="Preguntas" class="card-body table-responsive p-0">
-                                    <table class="table table-hover text-nowrap">
+                                <div id="Preguntas" class="card-body table-responsive">
+                                    <table class="table table-hover text-nowrap" id="preguntaTable">
                                         <thead>
                                             <tr>
                                                 <th>#</th>
@@ -480,7 +480,7 @@ include_once('layouts/head.php');
                                                     <td class="text-wrap">
                                                         <div class="truncate"><?php echo $pregunta_ind['respuesta_d']; ?></div>
                                                     </td>
-                                                    <td class="text-center align-middle">10</td>
+                                                    <td class="text-center align-middle"><?php echo $pregunta_ind['valor']; ?></td>
                                                     <td class="text-wrap text-center align-middle "><?php echo strtoupper($pregunta_ind['respuesta_correcta']); ?></td>
                                                     <td class="align-middle ">
                                                         <div class="d-flex justify-content-center">
@@ -509,30 +509,7 @@ include_once('layouts/head.php');
                                 <!--end::Body-->
                                 <!--begin::Footer-->
                                 <div class="card-footer">
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <p class="m-0">Total de Preguntas <?= $totalPreguntas['total'] ?></p>
-                                        </div>
-                                        <div class="col-6">
-                                            <ul class="pagination pagination-sm m-0 float-end">
-                                                <?php if ($pagina > 1) : ?>
-                                                    <li class="page-item">
-                                                        <a class="page-link" href="?id=<?= $id ?>&pagina=<?= $pagina - 1 ?>">&laquo;</a>
-                                                    </li>
-                                                <?php endif; ?>
-                                                <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
-                                                    <li class="page-item <?= ($i === $pagina) ? 'active' : '' ?>">
-                                                        <a class="page-link" href="?id=<?= $id ?>&pagina=<?= $i ?>"><?= $i ?></a>
-                                                    </li>
-                                                <?php endfor; ?>
-                                                <?php if ($pagina < $totalPages) : ?>
-                                                    <li class="page-item">
-                                                        <a class="page-link" href="?id=<?= $id ?>&pagina=<?= $pagina + 1 ?>">&raquo;</a>
-                                                    </li>
-                                                <?php endif; ?>
-                                            </ul>
-                                        </div>
-                                    </div>
+                                
                                 </div>
                                 <!--end::Footer-->
                             </div>
@@ -792,13 +769,16 @@ include_once('layouts/head.php');
     <!-- Termina Modal Agregar Pregunta -->
 
     <!-- OPTIONAL SCRIPTS -->
-    <!-- OPTIONAL SCRIPTS -->
-    <!-- jquey -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-    <!-- include summernote css/js-->
-    <link href="./includes/libs/summernote/summernote-lite.css" rel="stylesheet">
-    <script src="./includes/libs/summernote/summernote-lite.js"></script>
     <script>
+        $(document).ready(function() {
+            $('#preguntaTable').DataTable({
+                language: {
+                    decimal: ",",
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json'
+                }
+            });
+        });
+
         document.addEventListener("DOMContentLoaded", function() {
             // Obtén todos los enlaces con la clase 'delete-link'
             const deleteLinks = document.querySelectorAll(".delete-link");
