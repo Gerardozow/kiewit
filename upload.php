@@ -2,6 +2,9 @@
 require_once('includes/load.php');
 
 if (isset($_POST['upload_user'])) {
+    if(!isset($_FILES['profileImage'])){
+        redirect('./perfil.php', false);
+    }
     $targetDir = "uploads/users/";
     $imageName = basename($_FILES["profileImage"]["name"]);
     $targetFile = $targetDir . $imageName;
