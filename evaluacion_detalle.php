@@ -509,7 +509,7 @@ include_once('layouts/head.php');
                                 <!--end::Body-->
                                 <!--begin::Footer-->
                                 <div class="card-footer">
-                                
+
                                 </div>
                                 <!--end::Footer-->
                             </div>
@@ -772,10 +772,43 @@ include_once('layouts/head.php');
     <script>
         $(document).ready(function() {
             $('#preguntaTable').DataTable({
+                dom: '<"d-flex justify-content-between"Bf><"mb-2"rt><"card-footer"<"d-flex justify-content-between"ip>>',
+                buttons: [{
+                        extend: 'excelHtml5',
+                        text: '<i class="bi bi-file-earmark-excel"></i>',
+                        titleAttr: 'Exportar a Excel',
+                        className: 'btn btn-success',
+                        title: 'Título del documento',
+                        exportOptions: {
+                            columns: [2, 3, 4, 5]
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: '<i class="bi bi-file-earmark-pdf"></i>',
+                        titleAttr: 'Exportar a PDF',
+                        className: 'btn btn-danger ',
+                        title: 'Título del documento',
+                        exportOptions: {
+                            columns: [2, 3, 4, 5]
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="bi bi-printer"></i>',
+                        titleAttr: 'Imprimir',
+                        className: 'btn btn-info ',
+                        exportOptions: {
+                            columns: [2, 3, 4, 5]
+                        }
+                    }
+                ],
                 language: {
                     decimal: ",",
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json'
+
                 }
+
             });
         });
 

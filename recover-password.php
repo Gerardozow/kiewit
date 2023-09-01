@@ -51,8 +51,8 @@ if (isset($_POST['reset_password'])) {
             $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
 
             //Recipients
-            $mail->setFrom('no-reply@gerardozow.me', 'Gerardo Reyes');
-            $mail->addAddress('gerardo.reyes.m@outlook.com', 'Gerardo Reyes');     //Add a recipient
+            $mail->setFrom('no-reply@gerardozow.me', 'Administracion Kiewit');
+            $mail->addAddress($email);     //Add a recipient
             $mail->CharSet = 'UTF-8';
 
             //Content
@@ -67,7 +67,7 @@ if (isset($_POST['reset_password'])) {
             <body>                
                 <p>Recientemente has solicitado restablecer la contraseña de tu cuenta en nuestro sitio web. Para continuar con este proceso, haz clic en el enlace a continuación:</p>
                 
-                <p><a href="http://localhost/mauger/reset_password.php?token=' . $token . '">Restablece tu contraseña aquí</a></p>
+                <p><a href="http://localhost/kiewit/reset_password.php?token=' . $token . '">Restablece tu contraseña aquí</a></p>
                 
                 <p>Si no realizaste esta solicitud, puedes ignorar este correo. Tu contraseña actual seguirá siendo válida.</p>
                 
@@ -78,7 +78,7 @@ if (isset($_POST['reset_password'])) {
                 <p>Sitema de Administracion kiewit</p>
             </body>
             </html>';
-            $mail->AltBody = 'Restablece tu contraseña en el siguiente enlace <a href="http://localhost/mauger/reset_password.php?token=' . $token . '">Restablece tu contraseña aquí</a>';
+            $mail->AltBody = 'Restablece tu contraseña en el siguiente enlace <a href="http://localhost/kiewit/reset_password.php?token=' . $token . '">Restablece tu contraseña aquí</a>';
 
             $mail->send();
             $session->msg("s", 'si el email es correcto, se enviaran instrucciones para restablecer la contraseña');

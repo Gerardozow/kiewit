@@ -153,3 +153,18 @@ function email_validation($email)
     return $errors;
   }
 }
+
+/*--------------------------------------------------------------*/
+/* Funcion para generar contraseña  
+/*--------------------------------------------------------------*/
+function generarContrasena($longitud) {
+  $caracteres = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!,.';
+  $contrasena = '';
+
+  for ($i = 0; $i < $longitud; $i++) {
+      $indice = mt_rand(0, strlen($caracteres) - 1);
+      $contrasena .= $caracteres[$indice];
+  }
+
+  return $contrasena;
+}

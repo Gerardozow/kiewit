@@ -12,7 +12,7 @@ include_once('layouts/head.php');
   <div class="login-box">
     <div class="card card-outline card-primary">
       <div class="card-header text-center">
-        <a href="./index.php" class="h1">MAUGER</a>
+        <a href="./index.php" class="h1">Kiewit</a>
       </div>
       <div class="card-body">
         <p class="login-box-msg">¿Ha olvidado su contraseña?.</p>
