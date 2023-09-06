@@ -13,6 +13,19 @@ $departamento = find_all_az('departamentos', 'departamento');
 
 include_once('layouts/head.php');
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (isset($_GET['delete_candidato'])) {
+        $id_candidato = $_GET['delete_candidato'];
+        $query = "DELETE FROM evaluacion_candidato WHERE id_candidato = '$id_candidato'";
+        $result = $db->query($query);
+        $query = "DELETE FROM pass_temporal WHERE id = '$id_candidato'";
+        $result = $db->query($query);
+        $query = "DELETE FROM candidatos WHERE id = '$id_candidato'";
+        $result = $db->query($query);
+        $session->msg('s', "Candidato eliminado exitosamente! ");
+        redirect('candidatos.php', false);
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['registrar_candidato'])) {
@@ -255,14 +268,14 @@ $total_candidatos = count($candidatos);
                                                     <td><?= $candidato['password'] ?></td>
                                                     <td>
                                                         <ul class="list-group list-group-horizontal justify-content-center gap-2 ">
-                                                            <a href="#" class="btn btn-sm btn-secondary " data-bs-toggle="tooltip" data-candidato-id="<?php echo $candidato['id'] ?>"><svg xmlns=" http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-at" viewBox="0 0 16 16">
+                                                            <a href="#" class="btn btn-sm btn-info " data-bs-placement="top" data-bs-toggle="tooltip" data-bs-title="Reenviar contraseña por email" data-candidato-id="<?php echo $candidato['id'] ?>"><svg xmlns=" http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-at" viewBox="0 0 16 16">
                                                                     <path d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2H2Zm3.708 6.208L1 11.105V5.383l4.708 2.825ZM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2Z" />
                                                                     <path d="M14.247 14.269c1.01 0 1.587-.857 1.587-2.025v-.21C15.834 10.43 14.64 9 12.52 9h-.035C10.42 9 9 10.36 9 12.432v.214C9 14.82 10.438 16 12.358 16h.044c.594 0 1.018-.074 1.237-.175v-.73c-.245.11-.673.18-1.18.18h-.044c-1.334 0-2.571-.788-2.571-2.655v-.157c0-1.657 1.058-2.724 2.64-2.724h.04c1.535 0 2.484 1.05 2.484 2.326v.118c0 .975-.324 1.39-.639 1.39-.232 0-.41-.148-.41-.42v-2.19h-.906v.569h-.03c-.084-.298-.368-.63-.954-.63-.778 0-1.259.555-1.259 1.4v.528c0 .892.49 1.434 1.26 1.434.471 0 .896-.227 1.014-.643h.043c.118.42.617.648 1.12.648Zm-2.453-1.588v-.227c0-.546.227-.791.573-.791.297 0 .572.192.572.708v.367c0 .573-.253.744-.564.744-.354 0-.581-.215-.581-.8Z" />
                                                                 </svg>
                                                             </a>
-                                                            <a href="#" class="btn btn-sm btn-warning" data-candidato-id="<?php echo $candidato['id'] ?>"><svg xmlns=" http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                                            <a href="#" class="btn btn-sm btn-success " data-bs-placement="top" data-bs-toggle="tooltip" data-bs-title="Cargar Evaluaciones" data-candidato-id="<?php echo $candidato['id'] ?>"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder-plus" viewBox="0 0 16 16">
+                                                                    <path d="m.5 3 .04.87a1.99 1.99 0 0 0-.342 1.311l.637 7A2 2 0 0 0 2.826 14H9v-1H2.826a1 1 0 0 1-.995-.91l-.637-7A1 1 0 0 1 2.19 4h11.62a1 1 0 0 1 .996 1.09L14.54 8h1.005l.256-2.819A2 2 0 0 0 13.81 3H9.828a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 6.172 1H2.5a2 2 0 0 0-2 2Zm5.672-1a1 1 0 0 1 .707.293L7.586 3H2.19c-.24 0-.47.042-.683.12L1.5 2.98a1 1 0 0 1 1-.98h3.672Z" />
+                                                                    <path d="M13.5 9a.5.5 0 0 1 .5.5V11h1.5a.5.5 0 1 1 0 1H14v1.5a.5.5 0 1 1-1 0V12h-1.5a.5.5 0 0 1 0-1H13V9.5a.5.5 0 0 1 .5-.5Z" />
                                                                 </svg>
                                                             </a>
                                                             <a href="#" class="btn btn-sm btn-danger delete-link" data-candidato-id="<?php echo $candidato['id'] ?>"><svg xmlns=" http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
@@ -290,6 +303,26 @@ $total_candidatos = count($candidatos);
         <?php include_once('layouts/footer.php'); //footer 
         ?>
     </div>
+    <!-- Modal Delete candidato-->
+    <div class="modal" id="deleteConfirmationModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar al candidato?.<br><br>
+                    <strong>Se eliminara todo lo relacionado con el candidato (evaluaciones, respuestas, etc).</strong>
+                </div>
+                <div class="modal-footer">
+                    <a id="confirmDeleteButton" href="#" class="btn btn-danger">Eliminar</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end:: Modal Delete candidato-->
     <!--end::App Wrapper-->
     <?php include_once('layouts/scripts.php'); //scripts 
     ?>
@@ -298,6 +331,28 @@ $total_candidatos = count($candidatos);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Obtén todos los enlaces con la clase 'delete-link'
+            const deleteLinks = document.querySelectorAll(".delete-link");
+
+            // Itera sobre los enlaces y agrega un listener de clic a cada uno
+            deleteLinks.forEach(function(link) {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault(); // Evita que el enlace se abra
+
+                    const userId = link.getAttribute("data-candidato-id"); // Obtiene el ID del candidato
+                    const modal = new bootstrap.Modal(document.getElementById("deleteConfirmationModal")); // Crea una instancia del modal
+
+                    // Actualiza el enlace del botón de confirmación del modal con el ID del usuario
+                    const confirmButton = document.getElementById("confirmDeleteButton");
+                    confirmButton.setAttribute("href", `./candidatos.php?delete_candidato=${userId}`);
+
+                    // Muestra el modal
+                    modal.show();
+                });
+            });
+        });
+
         $(document).ready(function() {
             $('#buscarCandidatosTable').DataTable({
                 dom: '<"d-flex justify-content-between"Bf><"mb-2"rt><"card-footer"<"d-flex justify-content-between"ip>>',
@@ -306,9 +361,9 @@ $total_candidatos = count($candidatos);
                         text: '<i class="bi bi-file-earmark-excel"></i>',
                         titleAttr: 'Exportar a Excel',
                         className: 'btn btn-success',
-                        title: 'Título del documento',
+                        title: 'Candidatos Registrados',
                         exportOptions: {
-                            columns: [2, 3, 4, 5]
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
                         }
                     },
                     {
@@ -316,18 +371,18 @@ $total_candidatos = count($candidatos);
                         text: '<i class="bi bi-file-earmark-pdf"></i>',
                         titleAttr: 'Exportar a PDF',
                         className: 'btn btn-danger ',
-                        title: 'Título del documento',
+                        title: 'Candidatos Registrados',
                         exportOptions: {
-                            columns: [2, 3, 4, 5]
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
                         }
                     },
                     {
                         extend: 'print',
                         text: '<i class="bi bi-printer"></i>',
                         titleAttr: 'Imprimir',
-                        className: 'btn btn-info ',
+                        className: 'btn btn-secondary ',
                         exportOptions: {
-                            columns: [2, 3, 4, 5]
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
                         }
                     }
                 ],

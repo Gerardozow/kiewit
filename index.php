@@ -1,9 +1,11 @@
-<?php 
+<?php
 $title_page = "Login | Kiewit";
-  ob_start();
-  require_once('includes/load.php');
-  if($session->isUserLoggedIn(true)) { redirect('home.php', false);}
-  include_once('layouts/head.php');
+ob_start();
+require_once('includes/load.php');
+if ($session->isUserLoggedIn(true)) {
+    redirect('home.php', false);
+}
+include_once('layouts/head.php');
 ?>
 
 <body class="login-page bg-body-secondary">
@@ -18,7 +20,7 @@ $title_page = "Login | Kiewit";
             </div>
             <div class="card-body login-card-body">
                 <p class="login-box-msg">Inicia sesión</p>
-                <?php echo display_msg($msg); ?>   
+                <?php echo display_msg($msg); ?>
                 <form action="./auth.php" method="post">
                     <div class="input-group mb-1">
                         <div class="form-floating">
@@ -68,6 +70,7 @@ $title_page = "Login | Kiewit";
     </div>
     <!-- /.login-box -->
 
-  <?php include_once('./layouts/scripts.php') ?>
+    <?php include_once('./layouts/scripts.php') ?>
 </body><!--end::Body-->
+
 </html>

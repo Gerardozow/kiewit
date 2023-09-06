@@ -1,9 +1,9 @@
 <?php
 require_once('./includes/load.php');
 
-require_once ('./includes/libs/phpmailer/Exception.php');
-require_once ('./includes/libs/phpmailer/PHPMailer.php');
-require_once ('./includes/libs/phpmailer/SMTP.php');
+require_once('./includes/libs/phpmailer/Exception.php');
+require_once('./includes/libs/phpmailer/PHPMailer.php');
+require_once('./includes/libs/phpmailer/SMTP.php');
 
 //Cargar PHP MAILER
 use PHPMailer\PHPMailer\PHPMailer;
@@ -25,7 +25,7 @@ if (isset($_POST['reset_password'])) {
 
     if (!empty($id)) {
         //verificar si existe token activo y eliminarlo
-        
+
 
 
         // Generar un token único
@@ -89,9 +89,6 @@ if (isset($_POST['reset_password'])) {
             $session->msg("s", 'sAlgo salio mal, vuelve a intentarlo si persiste el error contacta al administrador');
             redirect('./index.php', false);
         }
-
-
-
     } else {
         echo 'id vacio';
         $session->msg("s", 'Si el email es correcto, se enviaran instrucciones para restablecer la contraseña');
